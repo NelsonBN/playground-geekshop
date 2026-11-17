@@ -13,6 +13,9 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="*" />
     <PackageReference Include="xunit.v3" Version="*" />
+    <!-- Microsoft Testing Platform extensions: required for `--coverage` and `--report-trx` (coverage gate and CI) -->
+    <PackageReference Include="Microsoft.Testing.Extensions.CodeCoverage" Version="*" />
+    <PackageReference Include="Microsoft.Testing.Extensions.TrxReport" Version="*" />
     <PackageReference Include="xunit.runner.visualstudio" Version="*" PrivateAssets="all" />
     <PackageReference Include="AwesomeAssertions" Version="*" />
     <PackageReference Include="NSubstitute" Version="*" />

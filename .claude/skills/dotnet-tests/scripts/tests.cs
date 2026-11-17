@@ -459,6 +459,7 @@ static class TestRunner
             [
                 "test", "--project", project,
                 "--results-directory", Path.GetFullPath(resultsDir),
+                "--coverage", "--coverage-output-format", "cobertura", "--coverage-output", "coverage.cobertura.xml",
             ];
             var (exit, output) = ExecLogged("coverage.log", "dotnet", arguments);
             if (exit != 0)

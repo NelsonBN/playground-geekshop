@@ -1,6 +1,4 @@
-<!-- Requires global.json at the repo root, because xunit.v3 runs on Microsoft.Testing.Platform and the .NET 10+ SDK
-     only supports that through the new `dotnet test`:  { "test": { "runner": "Microsoft.Testing.Platform" } }
-     Example only: copy to <Project>.Tests/<Project>.Tests.csproj and pin versions to the latest stable
+<!-- Example only: copy to <Project>.Tests/<Project>.Tests.csproj and pin versions to the latest stable
      (check with `dotnet package search <id>`). With central package management, move Version to Directory.Packages.props. -->
 <Project Sdk="Microsoft.NET.Sdk">
 

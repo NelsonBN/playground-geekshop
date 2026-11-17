@@ -12,10 +12,10 @@ Thresholds live in [../quality-gate.json](../quality-gate.json); never lower the
 
 ## Coverage
 
-`coverlet.MTP` collects Cobertura on Microsoft.Testing.Platform (`coverlet.collector` does not work with xunit v3 here); `dotnet-reportgenerator-globaltool` writes summaries and HTML. `tests.cs coverage` runs the unit projects, excludes migrations, `*.g.cs`, `obj`, `GeneratedCode` and `CompilerGenerated`, and lists the uncovered lines and branches of each failing file; write tests for them and re-run.
+A coverage collector producing Cobertura reports is required (none is configured for now); `dotnet-reportgenerator-globaltool` writes summaries and HTML. `tests.cs coverage` runs the unit projects, excludes migrations, `*.g.cs`, `obj`, `GeneratedCode` and `CompilerGenerated`, and lists the uncovered lines and branches of each failing file; write tests for them and re-run.
 
 - Coverage is a floor: it finds code no test touches. Branch coverage exposes missing negative cases. 100% is not required; an unreachable defensive branch may stay uncovered (list it in the report).
-- Excluding code needs the user's approval and a comment, and only fits generated code, migrations and `Program.cs` bootstrapping. Never `[ExcludeFromCodeCoverage]` on logic, extra `--coverlet-exclude*` options or `--coverlet-skip-auto-props` tricks.
+- Excluding code needs the user's approval and a comment, and only fits generated code, migrations and `Program.cs` bootstrapping. Never `[ExcludeFromCodeCoverage]` on logic, or extra exclusion options.
 - High coverage with weak assertions is worthless: that is what mutation testing catches (`quality`).
 
 ## Definition of done

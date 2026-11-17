@@ -1,6 +1,6 @@
 ---
 name: dotnet-tests
-description: 'Write, run and gate tests for .NET code: unit tests (xunit, AwesomeAssertions, NSubstitute), narrow integration tests (Testcontainers, WebApplicationFactory, Assertions.Web) and mutation tests (Stryker.NET), all in one fixed Arrange-Act-Assert / Given_When_Then pattern, with a coverage gate (coverlet.MTP + ReportGenerator) and a Stop hook that sends the agent back to finish the tests when they fail or coverage is too low. Test-first (TDD: red, fix, green) is mandatory for every fix or change made by an AI. Use when fixing a bug, a ticket, an issue, a review comment, a debug finding or any instruction (reproduce with a failing test first), implementing or changing a feature, adding or reviewing tests, checking coverage, killing surviving mutants, or before declaring a change done. Command form: /dotnet-tests [unit|integration|coverage|mutation|quality|all].'
+description: 'Write, run and gate tests for .NET code: unit tests (xunit, AwesomeAssertions, NSubstitute), narrow integration tests (Testcontainers, WebApplicationFactory, Assertions.Web) and mutation tests (Stryker.NET), all in one fixed Arrange-Act-Assert / Given_When_Then pattern, with a coverage gate (ReportGenerator) and a Stop hook that sends the agent back to finish the tests when they fail or coverage is too low. Test-first (TDD: red, fix, green) is mandatory for every fix or change made by an AI. Use when fixing a bug, a ticket, an issue, a review comment, a debug finding or any instruction (reproduce with a failing test first), implementing or changing a feature, adding or reviewing tests, checking coverage, killing surviving mutants, or before declaring a change done. Command form: /dotnet-tests [unit|integration|coverage|mutation|quality|all].'
 argument-hint: '[unit|integration|coverage|mutation|quality|all]'
 license: MIT
 allowed-tools: Bash(dotnet:*), Bash(reportgenerator:*), Bash(docker:*), Bash(git:*), PowerShell(dotnet:*), PowerShell(reportgenerator:*), PowerShell(docker:*), PowerShell(git:*), Read, Edit, Write, Grep, Glob
@@ -68,7 +68,7 @@ Every feature or fix ships with tests that prove it works and keep it working. D
 
 ## Prerequisites
 
-- .NET SDK on `PATH`; `global.json` needs `"test": { "runner": "Microsoft.Testing.Platform" }` (xunit v3 runs on MTP).
+- .NET SDK on `PATH`.
 - No test project yet: create it from [examples/TestProject.csproj.example](examples/TestProject.csproj.example).
 - Mutation: Stryker local tool and root scripts ([mutation-tests.md](references/mutation-tests.md#setup)); coverage reports: `dotnet tool install -g dotnet-reportgenerator-globaltool`; Docker only for Testcontainers. The script says what is missing.
 

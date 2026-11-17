@@ -1,6 +1,6 @@
 # Unit tests
 
-Fast (milliseconds), in-process, no network, disk, database or clock. A unit test checks one unit's observable behaviour: a return value, a state change, or an interaction at a boundary. Packages: [suggested-tools.md](suggested-tools.md). xunit v3 runs on Microsoft.Testing.Platform: pass the project with `--project`, filter with `--filter-display-name` or `--filter-trait`. Project file: [../examples/TestProject.csproj.example](../examples/TestProject.csproj.example).
+Fast (milliseconds), in-process, no network, disk, database or clock. A unit test checks one unit's observable behaviour: a return value, a state change, or an interaction at a boundary. Packages: [suggested-tools.md](suggested-tools.md). Pass the project with `--project`, filter with `--filter-display-name` or `--filter-trait`. Project file: [../examples/TestProject.csproj.example](../examples/TestProject.csproj.example).
 
 ## Pattern and assertions
 

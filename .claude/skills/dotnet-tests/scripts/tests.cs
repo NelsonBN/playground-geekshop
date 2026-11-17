@@ -458,9 +458,6 @@ static class TestRunner
             List<string> arguments =
             [
                 "test", "--project", project,
-                "--coverlet", "--coverlet-output-format", "cobertura", "--coverlet-file-prefix", Path.GetFileNameWithoutExtension(project),
-                "--coverlet-exclude-by-file", "**/Migrations/**", "**/*.g.cs", "**/obj/**",
-                "--coverlet-exclude-by-attribute", "GeneratedCode", "CompilerGenerated",
                 "--results-directory", Path.GetFullPath(resultsDir),
             ];
             var (exit, output) = ExecLogged("coverage.log", "dotnet", arguments);
@@ -476,7 +473,7 @@ static class TestRunner
         var reports = Directory.Exists(resultsDir) ? Directory.GetFiles(resultsDir, "*.cobertura*.xml", SearchOption.AllDirectories) : [];
         if (reports.Length == 0)
         {
-            throw new ToolException("no Cobertura report was produced; add the coverlet.MTP package to the test project and opt in to Microsoft.Testing.Platform (see references/quality-gate.md).");
+            throw new ToolException("no Cobertura report was produced; configure a coverage collector for the test projects (see references/quality-gate.md).");
         }
 
         var coverage = ParseCobertura(reports);

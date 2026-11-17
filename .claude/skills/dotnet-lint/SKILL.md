@@ -130,7 +130,7 @@ Work top to bottom: all errors, then all warnings, then all infos; inside each s
 
 Before a fix that can change behaviour (nullability, disposal, async, exception handling, public API, logic simplification), check whether tests already cover the code:
 
-1. Find the test projects (references to `Microsoft.NET.Test.Sdk`, `xunit`, `NUnit`, `MSTest` or `Microsoft.Testing.Platform`) and search them for the affected type or method.
+1. Find the test projects (references to `Microsoft.NET.Test.Sdk`, `xunit`, `NUnit` or `MSTest`) and search them for the affected type or method.
 2. If covered, apply the fix and run the covering tests.
 3. If not covered, write a small characterization test that passes on the current code, then apply the fix and re-run it. Follow the repo's test conventions.
 4. Skip this step for mechanical findings and pure style/naming changes. Deleting dead code needs no characterization test (nothing references it); run the covering tests afterwards.

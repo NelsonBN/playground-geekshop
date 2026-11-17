@@ -19,7 +19,7 @@ on:
 
 env:
   PROJECT_FILE: 'GeekShop.Api.csproj'
-  TEST_PROJECT_PATH: 'tests/GeekShop.Api.Tests/GeekShop.Api.Tests.csproj'
+  TEST_PROJECT_PATH: 'tests/GeekShop.Api.Tests'
 
   # Set up the .NET environment to improve test performance and reliability
   DOTNET_CLI_TELEMETRY_OPTOUT: true
@@ -107,13 +107,13 @@ jobs:
         mkdir -p ./.sonar/scanner
         dotnet tool update dotnet-sonarscanner --tool-path ./.sonar/scanner
 
+    # Run from the test project folder: with GeekShop.slnx in the root, Stryker would use the solution context, which rejects `-tp`
     - name: "Run Stryker"
+      working-directory: ${{ env.TEST_PROJECT_PATH }}
       env:
         STRYKER_API_KEY: ${{ secrets.STRYKER_API_KEY }}
       run: |
         dotnet stryker \
-          --config-file stryker-config.json \
-          -tp ${{ env.TEST_PROJECT_PATH }} \
           -p ${{ env.PROJECT_FILE }} \
           --test-runner mtp \
           --reporter json \

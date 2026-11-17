@@ -18,4 +18,6 @@ done
 dotnet tool restore
 dotnet restore
 dotnet build --no-restore
-dotnet stryker --config-file stryker-config.json ${open_report:+"$open_report"} "$@"
+dotnet stryker \
+  --reporter json --reporter progress --reporter cleartext --reporter html \
+  ${open_report:+"$open_report"} "$@"

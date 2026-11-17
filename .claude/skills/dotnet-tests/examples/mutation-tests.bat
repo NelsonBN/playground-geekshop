@@ -18,4 +18,4 @@ goto parse
 dotnet tool restore || exit /b 1
 dotnet restore || exit /b 1
 dotnet build --no-restore || exit /b 1
-dotnet stryker --config-file stryker-config.json %OPEN% %ARGS% || exit /b 1
+dotnet stryker --reporter json --reporter progress --reporter cleartext --reporter html %OPEN% %ARGS% || exit /b 1

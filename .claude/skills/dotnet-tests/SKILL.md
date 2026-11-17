@@ -43,7 +43,7 @@ Every feature or fix ships with tests that prove it works and keep it working. D
 - Start real infrastructure or a framework host in a unit test (database or in-memory database stand-in, web host, DI container, broker, network).
 - Retry flaky tests blindly; fix the cause or tell the user.
 - Use a tool from the [never list](references/suggested-tools.md#tools-to-never-use) or add one beyond the [base set](references/suggested-tools.md#tools-to-use) without asking.
-- Install Stryker globally or run it without the repo's tool manifest, config and root `mutation-tests.*` scripts.
+- Install Stryker globally or run it without the repo's tool manifest and root `mutation-tests.*` scripts.
 - Commit or push.
 
 ## Workflow
@@ -70,7 +70,7 @@ Every feature or fix ships with tests that prove it works and keep it working. D
 
 - .NET SDK on `PATH`; `global.json` needs `"test": { "runner": "Microsoft.Testing.Platform" }` (xunit v3 runs on MTP).
 - No test project yet: create it from [examples/TestProject.csproj.example](examples/TestProject.csproj.example).
-- Mutation: Stryker local tool, config and root scripts ([mutation-tests.md](references/mutation-tests.md#setup)); coverage reports: `dotnet tool install -g dotnet-reportgenerator-globaltool`; Docker only for Testcontainers. The script says what is missing.
+- Mutation: Stryker local tool and root scripts ([mutation-tests.md](references/mutation-tests.md#setup)); coverage reports: `dotnet tool install -g dotnet-reportgenerator-globaltool`; Docker only for Testcontainers. The script says what is missing.
 
 ## Hook
 

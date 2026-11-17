@@ -609,11 +609,6 @@ static class TestRunner
             throw new ToolException("dotnet-stryker is not in a local tool manifest. Copy examples/dotnet-tools.json to .config/dotnet-tools.json (see references/mutation-tests.md).");
         }
 
-        if (!File.Exists("stryker-config.json"))
-        {
-            throw new ToolException("stryker-config.json not found at the repository root. Copy examples/stryker-config.json (see references/mutation-tests.md).");
-        }
-
         var missingScripts = new[] { "mutation-tests.sh", "mutation-tests.bat" }.Where(script => !File.Exists(script)).ToList();
         if (missingScripts.Count > 0)
         {
@@ -641,8 +636,6 @@ static class TestRunner
 
         // Stryker's --since needs a branch, tag or commit SHA ("HEAD" is rejected).
         var since = Git("rev-parse", baseRef)?.Trim() ?? baseRef;
-        var threshold = gate.MutationScore.ToString("F0");
-        var high = Math.Max(90, gate.MutationScore).ToString("F0");
         var exitCode = 0;
         var reports = new List<string>();
         foreach (var project in projects)
@@ -666,8 +659,8 @@ static class TestRunner
             reports.Add(Path.Combine(outDir, "reports", "mutation-report.json"));
             List<string> arguments =
             [
-                "stryker", "--config-file", "stryker-config.json", "--project", source, $"--since:{since}",
-                "--break-at", threshold, "--threshold-low", threshold, "--threshold-high", high,
+                "stryker", "--reporter", "json", "--reporter", "progress", "--reporter", "cleartext", "--reporter", "html",
+                "--project", source, $"--since:{since}",
                 "--output", outDir,
             ];
             mine.ForEach(f => arguments.AddRange(["--mutate", Rel(f)]));

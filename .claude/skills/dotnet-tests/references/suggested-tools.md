@@ -15,7 +15,6 @@ Tools marked (base) are the skill's fixed stack and need no approval. Every othe
 | `Microsoft.NET.Test.Sdk` (base) | Test host | Always | Every test project |
 | `xunit.analyzers` (base, included with xunit.v3) | Test-quality analyzer rules | Always | Every test project |
 | `AwesomeAssertions` (base) | All assertions (`.Should()`) | Always | Every test |
-| `coverlet.MTP` (base) | Coverage collection (Cobertura) | Always | Coverage gate, every unit test project |
 | `Stryker.NET` (`dotnet-stryker`, base) | Mutation testing, as a local tool pinned in `.config/dotnet-tools.json` | Always | Mutation step on changed files |
 | `NSubstitute` (base) | Dummy, stub, spy, mock, fake | Specific cases | The unit depends on a boundary (I/O, clock, external service) |
 | `Testcontainers` + module (base) | Real dependencies in disposable containers | Specific cases | Integration tests that need a real database, cache or broker |

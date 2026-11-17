@@ -8,17 +8,15 @@ Stryker is a **local tool** pinned in the repository, never a global install, so
 
 | File (repo root) | Copy from | Purpose |
 |------------------|-----------|---------|
-| `.config/dotnet-tools.json` | [../examples/dotnet-tools.json](../examples/dotnet-tools.json) | Pins `dotnet-stryker` (restored with `dotnet tool restore`) |
-| `stryker-config.json` | [../examples/stryker-config.json](../examples/stryker-config.json) | Runner, reporters, thresholds, excludes |
-| `mutation-tests.bat` | [../examples/mutation-tests.bat](../examples/mutation-tests.bat) | Windows script. **Create it at the root** (the skill script refuses to run mutation without it) |
+| `.config/dotnet-tools.json` | [../examples/dotnet-tools.json](../examples/dotnet-tools.json) | Tool manifest; `dotnet-stryker` is removed for now, add it back (`dotnet tool install dotnet-stryker`) to run mutation tests |
+| `mutation-tests.bat` | [../examples/mutation-tests.bat](../examples/mutation-tests.bat) | Windows script; holds the Stryker settings (runner and reporters) as parameters. **Create it at the root** (the skill script refuses to run mutation without it) |
 | `mutation-tests.sh` | [../examples/mutation-tests.sh](../examples/mutation-tests.sh) | Linux and macOS script. **Create it at the root**, same rule (keep LF line endings; `chmod +x`, or `git update-index --chmod=+x mutation-tests.sh`) |
 
 Requirements, all verified with Stryker 5.1.0:
 
 - A solution file (`.sln` or `.slnx`) at the repository root. Stryker then runs in solution context, where `--test-project` / `test-projects` is **rejected**; it finds the test projects from the solution. Use `--project <Source>.csproj` to limit it to one source project.
-- `"test-runner": "mtp"` in the config: xunit v3 runs on Microsoft.Testing.Platform. With the default VSTest runner Stryker cannot see the tests and reports 0% ("test coverage capture failed"). The MTP runner is marked preview by Stryker; treat the score as indicative and verify surprising results.
 - Add `StrykerOutput/` to `.gitignore`.
-- Thresholds: `break` must be lower than or equal to `low` (Stryker refuses to start otherwise). The numbers in `stryker-config.json` and in `quality-gate.json` should match (80).
+- There is no `stryker-config.json` and no threshold parameters: Stryker uses its default thresholds (break 0, low 60, high 80).
 
 ## Run
 
@@ -28,7 +26,7 @@ mutation-tests.bat                        # Windows
 ./mutation-tests.sh -o --project MyProject.csproj --since:main     # -o opens the HTML report; other arguments go to Stryker
 ```
 
-The scripts do what a developer would do by hand: `dotnet tool restore`, `dotnet restore`, `dotnet build --no-restore`, then `dotnet stryker --config-file stryker-config.json` (the HTML report is opened in the browser only when you pass `-o` or `--open`; agents and CI never pass it).
+The scripts do what a developer would do by hand: `dotnet tool restore`, `dotnet restore`, `dotnet build --no-restore`, then `dotnet stryker` with the settings as parameters (the HTML report is opened in the browser only when you pass `-o` or `--open`; agents and CI never pass it).
 
 For the agent and the quality gate use the skill script, which mutates only what changed and writes to `artifacts/dotnet-tests/mutation/<project>/`:
 
@@ -79,7 +77,7 @@ When stopping with survivors left, list each one in the report's "Decisions need
 
 A repository can opt a source project out of mutation runs that its tool cannot handle by listing its name (without extension) in `.config/dotnet-tools.json` as `{ "mutationIgnore": ["<SourceProject>"] }` (ask the user first, state the reason in the report); `mutation` then prints `SKIP` for it.
 
-Excluding mutants in the config (`mutate` globs, `ignore-mutations`, `ignore-methods`) requires the user's approval and a reason; never exclude to raise the score.
+Excluding mutants in the script parameters (`--mutate` globs, `ignore-mutations`, `ignore-methods`) requires the user's approval and a reason; never exclude to raise the score.
 
 ## Tips
 

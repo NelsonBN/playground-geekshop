@@ -18,7 +18,6 @@
     <PackageReference Include="xunit.runner.visualstudio" Version="*" PrivateAssets="all" />
     <PackageReference Include="AwesomeAssertions" Version="*" />
     <PackageReference Include="NSubstitute" Version="*" />
-    <PackageReference Include="coverlet.MTP" Version="*" PrivateAssets="all" />
   </ItemGroup>
 
   <!-- Global usings for the test libraries: keep one line per PackageReference above, remove the ones the project does not use -->

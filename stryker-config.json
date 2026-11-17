@@ -1,6 +1,7 @@
 {
   "stryker-config": {
     "test-runner": "mtp",
+    "project-info": { "name": "github.com/NelsonBN/playground-geekshop" },
     "reporters": ["json", "progress", "cleartext", "html"],
     "thresholds": { "high": 90, "low": 80, "break": 80 },
     "mutate": ["!**/*.g.cs", "!**/Program.cs"]

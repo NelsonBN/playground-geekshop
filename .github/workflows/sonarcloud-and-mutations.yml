@@ -120,7 +120,6 @@ jobs:
           --reporter markdown \
           --reporter progress \
           --reporter dashboard --dashboard-api-key $STRYKER_API_KEY \
-          --dashboard-project github.com/${{ github.repository }} \
           --version ${{ env.STRYKER_BRANCH }} \
           -O ${{ github.workspace }}/mutations
 

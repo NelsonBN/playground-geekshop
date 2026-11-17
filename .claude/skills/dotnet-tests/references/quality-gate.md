@@ -30,18 +30,3 @@ A coverage collector producing Cobertura reports is required (none is configured
 ## Flaky tests
 
 Never retry blindly or add sleeps. Reproduce (loop the test), find the shared state, race or time dependency, fix it. If it cannot be fixed now, tell the user and propose a quarantine (`[Trait("Category", "Quarantine")]` plus an issue); never silently skip. xunit runs classes in parallel: keep fixtures read-only and per-test state local; a `[Collection]` is the last resort for a truly shared resource.
-
-## CI
-
-```yaml
-- uses: actions/setup-dotnet@v4
-  with: { global-json-file: global.json }
-- run: dotnet tool install -g dotnet-reportgenerator-globaltool
-- run: dotnet run .claude/skills/dotnet-tests/scripts/tests.cs -- all
-- run: dotnet tool restore
-- run: dotnet run .claude/skills/dotnet-tests/scripts/tests.cs -- quality
-- uses: actions/upload-artifact@v4
-  with: { name: test-reports, path: artifacts/dotnet-tests }
-```
-
-Mutation in CI needs full history (`fetch-depth: 0`) so `--since` can diff against the base branch.

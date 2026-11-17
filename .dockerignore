@@ -1,0 +1,15 @@
+**/bin/
+**/obj/
+.git/
+.github/
+.claude/
+.vs/
+.config/
+artifacts/
+StrykerOutput/
+tests/
+*.md
+.env
+.env.*
+docker-compose*.yml
+Dockerfile

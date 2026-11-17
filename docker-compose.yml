@@ -1,0 +1,38 @@
+networks:
+  geekshop:
+    driver: bridge
+
+services:
+
+  sqlserver:
+    extends:
+      file: docker-compose.dependencies.yml
+      service: sqlserver
+
+  mssqltools:
+    extends:
+      file: docker-compose.dependencies.yml
+      service: mssqltools
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: geekshop-api
+    container_name: geekshop-api
+    restart: unless-stopped
+    environment:
+      ConnectionStrings__GeekShop: Server=sqlserver;Database=GeekShop;User Id=sa;Password=${MSSQL_SA_PASSWORD:?Set MSSQL_SA_PASSWORD in .env (copy .env.example)};TrustServerCertificate=True
+    ports:
+      - 8080:8080
+    networks:
+      - geekshop
+    depends_on:
+      mssqltools:
+        condition: service_completed_successfully
+
+volumes:
+  sqlserver-data:

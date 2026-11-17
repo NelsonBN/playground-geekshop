@@ -3,12 +3,12 @@ name: dotnet-lint
 description: 'Lint a .NET solution end to end: find and fix build errors, warnings, analyzer findings (CA*), code-style and code-smell suggestions (IDE*, editorconfig) that `dotnet build` alone hides, and detect and remove dead code (unused private members, parameters, usings), with a deterministic cross-platform scan, severity-ordered fixes, and a final report. A Stop hook runs the same scan on the uncommitted diff so it can never be skipped. Works on-demand (only code changed vs the default branch) or as a command with arguments: /dotnet-lint [all|error|warning|info|deadcode|<code>]. Use when the user asks to lint, build, validate the build, fix warnings, fix analyzer or style suggestions, clean code smells, remove dead or unused code, improve reliability, or before declaring a change done or ready to commit.'
 argument-hint: '[all|error|warning|info|deadcode|<diagnostic code, e.g. CA2263>]'
 license: MIT
-allowed-tools: Bash
+allowed-tools: Bash, mcp__sonarqube__search_my_sonarqube_projects, mcp__sonarqube__list_branches, mcp__sonarqube__list_pull_requests, mcp__sonarqube__get_project_quality_gate_status, mcp__sonarqube__search_sonar_issues_in_projects, mcp__sonarqube__search_security_hotspots, mcp__sonarqube__show_rule
 ---
 
 # .NET Lint
 
-Scan the solution with a fixed sequence of commands, fix the findings in a fixed order (severity, then criticality), re-scan until clean, and finish with a written report that is printed to the CLI. Never report "build succeeded" without having inspected warnings and info items.
+Scan the solution with a fixed sequence of commands (plus SonarQube feedback when its MCP is available), fix the findings in a fixed order (severity, then criticality), re-scan until clean, and finish with a written report that is printed to the CLI. Never report "build succeeded" without having inspected warnings and info items.
 
 ## When to Use
 
@@ -106,7 +106,11 @@ dotnet run <skill-dir>/scripts/lint.cs -- --scope <scope> --reset
 
 Exit codes: `0` nothing in scope, `1` findings remain, `2` tooling or usage error, including a `deadcode` or dead-code-rule scope whose main build, or dedicated dead-code build, has errors outside the dead-code rules (read the message; fix the environment, not the code; for example, never edit `global.json` to get past an SDK mismatch). Format-only findings are labelled `info`; everything the build reports keeps its own severity. The criticality order is in [references/severity-order.md](references/severity-order.md).
 
-If the exit code is `0`, go straight to step 6.
+If the exit code is `0`, skip to step 2b, then to step 6 if Sonar adds nothing.
+
+### 2b. SonarQube feedback (only when the MCP is available)
+
+If `mcp__sonarqube__*` tools exist in the session, follow [references/sonarqube.md](references/sonarqube.md) to read the quality gate, open issues and security hotspots for this repository's branch or pull request, and triage them against the scope. Merge the actionable ones into the fix list of step 3 (after the local findings of the same severity). If the tools are not available, skip this step without comment. Sonar results are advisory: they never change the exit codes or the Stop hook, which only runs the local scan.
 
 ### 3. Fix, in the order of `findings.tsv`
 
@@ -151,7 +155,7 @@ Do not pass `--reset`. Repeat steps 3 to 5 until exit `0`, or until every remain
 dotnet run <skill-dir>/scripts/lint.cs -- --report --decisions "<item 1>" "<item 2>"
 ```
 
-The script writes `artifacts/dotnet-lint/report.md` and prints its content to the CLI: summary by severity (initial, fixed, remaining, new), dead-code rules not scanned (disabled in `.editorconfig` for at least one file), fixed issues, remaining issues, new issues, files changed, test files touched, and decisions needed. `--decisions` is optional; use it for abandoned findings and the git-ignore warning.
+The script writes `artifacts/dotnet-lint/report.md` and prints its content to the CLI: summary by severity (initial, fixed, remaining, new), dead-code rules not scanned (disabled in `.editorconfig` for at least one file), fixed issues, remaining issues, new issues, files changed, test files touched, and decisions needed. `--decisions` is optional; use it for abandoned findings, the git-ignore warning and unresolved SonarQube items (see [references/sonarqube.md](references/sonarqube.md)).
 
 Finish by stating the outcome (the report path and the counts of fixed and remaining findings). Generic follow-ups, such as building the project and running the tests, are the caller's next steps; do not run or require any other skill for them.
 

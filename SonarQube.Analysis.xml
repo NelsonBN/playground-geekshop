@@ -4,5 +4,4 @@
                              xmlns="http://www.sonarsource.com/msbuild/integration/2015/1">
   <Property Name="sonar.exclusions">**/bin/**,**/obj/**,artifacts/**,**/*.g.cs</Property>
   <Property Name="sonar.coverage.exclusions">tests/**</Property>
-  <Property Name="sonar.cs.cobertura.reportsPaths">artifacts/sonar/coverage/**/*.xml</Property>
 </SonarQubeAnalysisProperties>

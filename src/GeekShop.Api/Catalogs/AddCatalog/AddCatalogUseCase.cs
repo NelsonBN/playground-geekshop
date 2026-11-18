@@ -4,12 +4,7 @@ public sealed class AddCatalogUseCase(ICatalogsRepository repository)
 {
     public async Task<Guid> HandleAsync(AddCatalogRequest request, CancellationToken cancellationToken)
     {
-        var catalog = new Catalog
-        {
-            Id = Guid.NewGuid(),
-            Name = request.Name,
-            Description = request.Description
-        };
+        var catalog = Catalog.Create(request.Name, request.Description);
 
         await repository.AddAsync(catalog, cancellationToken);
 

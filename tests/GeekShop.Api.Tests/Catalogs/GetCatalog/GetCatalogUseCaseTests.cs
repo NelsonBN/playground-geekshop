@@ -10,7 +10,7 @@ public sealed class GetCatalogUseCaseTests
     public async Task Given_ExistingCatalog_When_Handle_Then_ReturnsDetailsWithProducts()
     {
         // Arrange
-        var catalog = new Catalog { Id = Guid.NewGuid(), Name = "Summer", Description = "Deals" };
+        var catalog = Catalog.Create("Summer", "Deals");
         var product = new Product { Id = Guid.NewGuid(), Name = "Keyboard", Quantity = 5, Price = 19.9 };
         var repository = Substitute.For<ICatalogsRepository>();
         repository.GetAsync(catalog.Id, TestContext.Current.CancellationToken).Returns(catalog);

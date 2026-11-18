@@ -118,6 +118,10 @@ tests/
   business capability and use case, keeping each endpoint and its request,
   response and business logic together. Extract shared code or persistence
   infrastructure only when genuinely needed.
+- Follow **domain-driven design** modeling: entities and value objects own and
+  enforce their rules (validation, invariants, state changes) and expose
+  behavior through factory and domain methods with private setters, instead of
+  anemic data bags. Use cases orchestrate; they do not hold the entity's rules.
 - Use dependency injection for dependencies.
 
 ## Agent Skills

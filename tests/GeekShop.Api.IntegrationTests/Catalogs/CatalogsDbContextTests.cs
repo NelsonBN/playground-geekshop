@@ -61,12 +61,9 @@ public sealed class CatalogsDbContextTests(DatabaseFixture database) : IAsyncDis
         // Arrange
         await using var scope = _factory.Services.CreateAsyncScope();
         var context = scope.ServiceProvider.GetRequiredService<CatalogsDbContext>();
-        var catalog = new Catalog
-        {
-            Id = Guid.NewGuid(),
-            Name = new string('n', 200),
-            Description = new string('d', 500)
-        };
+        var catalog = Catalog.Create(
+            new string('n', Catalog.NAME_MAX_LENGTH),
+            new string('d', Catalog.DESCRIPTION_MAX_LENGTH));
 
         // Act
         context.Catalogs.Add(catalog);

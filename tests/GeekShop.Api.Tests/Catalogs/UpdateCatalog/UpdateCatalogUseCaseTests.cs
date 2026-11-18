@@ -9,7 +9,7 @@ public sealed class UpdateCatalogUseCaseTests
     public async Task Given_ExistingCatalog_When_Handle_Then_UpdatesAndReturnsTrue()
     {
         // Arrange
-        var catalog = new Catalog { Id = Guid.NewGuid(), Name = "Old", Description = "Old description" };
+        var catalog = Catalog.Create("Old", "Old description");
         var repository = Substitute.For<ICatalogsRepository>();
         repository.GetAsync(catalog.Id, TestContext.Current.CancellationToken).Returns(catalog);
         var useCase = new UpdateCatalogUseCase(repository);

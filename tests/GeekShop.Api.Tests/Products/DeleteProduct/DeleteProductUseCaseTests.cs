@@ -33,7 +33,7 @@ public sealed class DeleteProductUseCaseTests
         var id = Guid.NewGuid();
         _repository.ExistsAsync(id, TestContext.Current.CancellationToken).Returns(true);
         _catalogs.ListByProductAsync(id, TestContext.Current.CancellationToken)
-            .Returns([new Catalog { Id = Guid.NewGuid(), Name = "Summer" }]);
+            .Returns([Catalog.Create("Summer", null)]);
         var useCase = new DeleteProductUseCase(_repository, _catalogs);
 
         // Act

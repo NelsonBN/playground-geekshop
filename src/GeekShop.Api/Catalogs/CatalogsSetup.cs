@@ -26,7 +26,22 @@ public static class CatalogsSetup
 
     public static IEndpointRouteBuilder MapCatalogs(this IEndpointRouteBuilder endpoints)
     {
-        var group = endpoints.MapGroup("/catalogs");
+        var group = endpoints
+            .MapGroup("/catalogs")
+            .AddEndpointFilter(async (context, next) =>
+            {
+                try
+                {
+                    return await next(context);
+                }
+                catch(InvalidCatalogException exception)
+                {
+                    return Results.Problem(
+                        title: "Invalid catalog",
+                        detail: exception.Message,
+                        statusCode: StatusCodes.Status400BadRequest);
+                }
+            });
 
         GetCatalogsEndpoint.Map(group);
         GetCatalogEndpoint.Map(group);

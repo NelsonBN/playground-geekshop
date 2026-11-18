@@ -11,8 +11,7 @@ public sealed class UpdateCatalogUseCase(ICatalogsRepository repository)
             return false;
         }
 
-        catalog.Name = request.Name;
-        catalog.Description = request.Description;
+        catalog.Update(request.Name, request.Description);
 
         await repository.UpdateAsync(catalog, cancellationToken);
 

@@ -18,8 +18,8 @@ public sealed class CatalogsDbContext(DbContextOptions<CatalogsDbContext> option
             catalog.ToTable("Catalogs");
             catalog.HasKey(c => c.Id);
             catalog.Property(c => c.Id).ValueGeneratedNever();
-            catalog.Property(c => c.Name).IsRequired().HasMaxLength(200);
-            catalog.Property(c => c.Description).HasMaxLength(500);
+            catalog.Property(c => c.Name).IsRequired().HasMaxLength(Catalog.NAME_MAX_LENGTH);
+            catalog.Property(c => c.Description).HasMaxLength(Catalog.DESCRIPTION_MAX_LENGTH);
         });
 
         modelBuilder.Entity<CatalogProduct>(link =>

@@ -11,7 +11,7 @@ public sealed class GetProductUseCaseTests
     {
         // Arrange
         var product = new Product { Id = Guid.NewGuid(), Name = "Keyboard", Quantity = 5, Price = 19.9 };
-        var catalog = new Catalog { Id = Guid.NewGuid(), Name = "Peripherals" };
+        var catalog = Catalog.Create("Peripherals", null);
         var repository = Substitute.For<IProductsRepository>();
         repository.GetAsync(product.Id, TestContext.Current.CancellationToken).Returns(product);
         var catalogs = Substitute.For<ICatalogsRepository>();

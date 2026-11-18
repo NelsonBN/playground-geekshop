@@ -33,6 +33,25 @@ public sealed class UpdateCatalogEndpointTests(DatabaseFixture database) : IAsyn
     }
 
     [Fact]
+    public async Task Given_NameOverTheLimit_When_UpdateCatalog_Then_ReturnsBadRequestAndKeepsTheCatalog()
+    {
+        // Arrange
+        var client = _factory.CreateClient();
+        var request = CatalogsApi.NewAddRequest();
+        var id = await CatalogsApi.CreateAsync(client, request);
+        var update = new UpdateCatalogRequest { Name = new string('n', 201) };
+
+        // Act
+        var response = await client.PutAsJsonAsync($"/catalogs/{id}", update, TestContext.Current.CancellationToken);
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        var stored = await client.GetFromJsonAsync<GetCatalogResponse>(
+            $"/catalogs/{id}", TestContext.Current.CancellationToken);
+        stored!.Name.Should().Be(request.Name);
+    }
+
+    [Fact]
     public async Task Given_UnknownId_When_UpdateCatalog_Then_ReturnsNotFound()
     {
         // Arrange

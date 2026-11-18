@@ -36,6 +36,26 @@ public sealed class CatalogsDbContextTests(DatabaseFixture database) : IAsyncDis
     }
 
     [Fact]
+    public async Task Given_Schema_When_QueryingIndexes_Then_ProductIdLeadsAnIndexOfCatalogProducts()
+    {
+        // Arrange
+        await using var scope = _factory.Services.CreateAsyncScope();
+        var context = scope.ServiceProvider.GetRequiredService<CatalogsDbContext>();
+
+        // Act
+        var indexes = await context.Database.SqlQuery<int>($"""
+            SELECT COUNT(*) AS Value
+            FROM sys.index_columns ic
+            WHERE ic.object_id = OBJECT_ID(N'dbo.CatalogProducts')
+              AND ic.key_ordinal = 1
+              AND COL_NAME(ic.object_id, ic.column_id) = N'ProductId'
+            """).SingleAsync(TestContext.Current.CancellationToken);
+
+        // Assert
+        indexes.Should().BePositive();
+    }
+
+    [Fact]
     public async Task Given_LongDescription_When_Saved_Then_DatabaseSchemaAcceptsTheModel()
     {
         // Arrange

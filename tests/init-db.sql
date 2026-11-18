@@ -39,6 +39,9 @@ BEGIN
         ProductId UNIQUEIDENTIFIER NOT NULL
             CONSTRAINT FK_CatalogProducts_Products REFERENCES dbo.Products (Id),
         CONSTRAINT PK_CatalogProducts PRIMARY KEY (CatalogId, ProductId));
+
+    -- Reverse lookup: the catalogs of a product (product details and product delete).
+    CREATE INDEX IX_CatalogProducts_ProductId ON dbo.CatalogProducts (ProductId);
 END
 
 GO

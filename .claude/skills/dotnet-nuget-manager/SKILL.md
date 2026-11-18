@@ -1,6 +1,6 @@
 ---
 name: dotnet-nuget-manager
-description: 'Manage NuGet packages in .NET projects/solutions. Use this skill when adding, removing, or updating NuGet package versions. It enforces using `dotnet` CLI for package management and provides strict procedures for direct file edits only when updating versions.'
+description: 'Manage NuGet packages and .NET local tools in .NET projects/solutions. Use this skill when adding, removing, or updating NuGet package versions, or updating the local tools in `.config/dotnet-tools.json`. It enforces using `dotnet` CLI for package management and provides strict procedures for direct file edits only when updating versions.'
 license: MIT
 ---
 
@@ -56,6 +56,13 @@ When updating a version, follow these steps:
 4.  **Verify Stability**:
     Run `dotnet restore` on the project or solution. If errors occur, revert the change and investigate.
 
+### Updating Local Tools
+Whenever packages are updated, also update the .NET local tools declared in `.config/dotnet-tools.json`. Use the `dotnet tool` CLI, never edit the manifest by hand:
+
+1.  **List and check**: `dotnet tool restore`, then `dotnet tool list` to see the current versions. Find the latest version with `dotnet package search <TOOL_PACKAGE_ID> --exact-match --format json`.
+2.  **Update**: `dotnet tool update <TOOL_PACKAGE_ID>` for each tool (local manifest is picked up automatically; add `--version <VERSION>` to pin one).
+3.  **Verify**: run `dotnet tool restore` and `dotnet tool list` again, then re-run the affected command (for mutation testing, `dotnet run .\.claude\skills\dotnet-tests\scripts	ests.cs -- mutation`). If it breaks, revert the manifest change and investigate.
+
 ## Examples
 
 ### User: "Add Microsoft.Extensions.Hosting to the WebApi project"
@@ -67,3 +74,4 @@ When updating a version, follow these steps:
 2. Find where it's defined (e.g., `Directory.Packages.props`).
 3. Edit the file to update the version.
 4. Run `dotnet restore`.
+5. Update the local tools: `dotnet tool update dotnet-stryker`, then `dotnet tool restore`.

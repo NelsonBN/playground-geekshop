@@ -13,4 +13,4 @@ app
     .MapProducts()
     .MapHealth();
 
-app.Run();
+await app.RunAsync();

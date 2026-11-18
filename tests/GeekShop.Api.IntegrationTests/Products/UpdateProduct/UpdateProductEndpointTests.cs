@@ -29,7 +29,7 @@ public sealed class UpdateProductEndpointTests(DatabaseFixture database) : IAsyn
         response.StatusCode.Should().Be(HttpStatusCode.NoContent);
         var stored = await client.GetFromJsonAsync<GetProductResponse>(
             $"/products/{id}", TestContext.Current.CancellationToken);
-        stored.Should().Be(new GetProductResponse(id, update.Name, 1, 2));
+        stored.Should().BeEquivalentTo(new GetProductResponse(id, update.Name, 1, 2, []));
     }
 
     [Fact]

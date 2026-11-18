@@ -1,0 +1,26 @@
+using GeekShop.Api.Catalogs;
+using GeekShop.Api.Catalogs.GetCatalogs;
+
+namespace GeekShop.Api.Tests.Catalogs.GetCatalogs;
+
+public sealed class GetCatalogsUseCaseTests
+{
+    [Fact]
+    public async Task Given_Catalogs_When_Handle_Then_ReturnsIdAndNameOfEach()
+    {
+        // Arrange
+        var first = new Catalog { Id = Guid.NewGuid(), Name = "Summer", Description = "Deals" };
+        var second = new Catalog { Id = Guid.NewGuid(), Name = "Winter" };
+        var repository = Substitute.For<ICatalogsRepository>();
+        repository.ListAsync(TestContext.Current.CancellationToken).Returns([first, second]);
+        var useCase = new GetCatalogsUseCase(repository);
+
+        // Act
+        var result = await useCase.HandleAsync(TestContext.Current.CancellationToken);
+
+        // Assert
+        result.Should().Equal(
+            new GetCatalogsResponse(first.Id, "Summer"),
+            new GetCatalogsResponse(second.Id, "Winter"));
+    }
+}

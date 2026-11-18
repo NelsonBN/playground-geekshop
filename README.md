@@ -1,14 +1,34 @@
 # GeekShop
 
 Backend API for a shop, built with .NET 11 and ASP.NET Core Minimal APIs. It
-currently manages products, stored in SQL Server through EF Core.
+currently manages products and catalogs, stored in SQL Server through EF Core.
 
 ## Features
 
 - **Product management**: add, view, list, update and delete products.
+- **Catalog management**: create, view, list, update and delete catalogs, and
+  add or remove the products they contain. A catalog shows its products and a
+  product shows the catalogs it belongs to. Products that belong to a catalog
+  cannot be deleted.
 - **Health monitoring**: startup, liveness and readiness probes for containers
   and orchestrators.
 - **Easy local setup**: run everything, or only the dependencies, with Docker.
+
+## Catalog routes
+
+| Verb | Route | Result |
+|---|---|---|
+| `GET` | `/catalogs` | `200` list of catalogs (`id`, `name`) |
+| `GET` | `/catalogs/{id}` | `200` catalog with its products, or `404` |
+| `POST` | `/catalogs` | `201` with the new catalog id |
+| `PUT` | `/catalogs/{id}` | `204`, or `404` |
+| `DELETE` | `/catalogs/{id}` | `204`, or `404` (products are kept) |
+| `PUT` | `/catalogs/{id}/products/{productId}` | `204` adds the product (idempotent), or `404` |
+| `DELETE` | `/catalogs/{id}/products/{productId}` | `204` removes the product from the catalog only, or `404` |
+
+`GET /products/{id}` also returns the catalogs the product belongs to. A product
+that belongs to a catalog cannot be deleted (`DELETE /products/{id}` returns
+`409`) until it is removed from all its catalogs.
 
 ## Run
 

@@ -16,6 +16,8 @@ The intended stack is:
 ### Features
 
 - Product management.
+- Catalog management (catalogs group products; products can be added to and
+  removed from catalogs).
 
 For the user-facing feature list, API routes, health checks and run
 instructions, read [`README.md`](README.md) when you need that context (for

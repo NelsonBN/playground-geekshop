@@ -28,7 +28,25 @@ public sealed class GetProductEndpointTests(DatabaseFixture database) : IAsyncDi
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var body = await response.Content.ReadFromJsonAsync<GetProductResponse>(
             TestContext.Current.CancellationToken);
-        body.Should().Be(new GetProductResponse(id, request.Name, 5, 19.9));
+        body.Should().BeEquivalentTo(new GetProductResponse(id, request.Name, 5, 19.9, []));
+    }
+
+    [Fact]
+    public async Task Given_ProductInCatalogs_When_GetProduct_Then_ReturnsTheCatalogsItBelongsTo()
+    {
+        // Arrange
+        var client = _factory.CreateClient();
+        var productId = await ProductsApi.CreateAsync(client, ProductsApi.NewAddRequest());
+        var catalogRequest = CatalogsApi.NewAddRequest();
+        var catalogId = await CatalogsApi.CreateAsync(client, catalogRequest);
+        await CatalogsApi.AddProductAsync(client, catalogId, productId);
+
+        // Act
+        var body = await client.GetFromJsonAsync<GetProductResponse>(
+            $"/products/{productId}", TestContext.Current.CancellationToken);
+
+        // Assert
+        body!.Catalogs.Should().BeEquivalentTo([new ProductCatalogResponse(catalogId, catalogRequest.Name)]);
     }
 
     [Fact]

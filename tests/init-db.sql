@@ -20,3 +20,25 @@ BEGIN
 END
 
 GO
+
+IF OBJECT_ID(N'dbo.Catalogs', N'U') IS NULL
+BEGIN
+    CREATE TABLE dbo.Catalogs (
+        Id          UNIQUEIDENTIFIER NOT NULL CONSTRAINT PK_Catalogs PRIMARY KEY,
+        Name        NVARCHAR(200)    NOT NULL,
+        Description NVARCHAR(500)    NULL);
+END
+
+GO
+
+IF OBJECT_ID(N'dbo.CatalogProducts', N'U') IS NULL
+BEGIN
+    CREATE TABLE dbo.CatalogProducts (
+        CatalogId UNIQUEIDENTIFIER NOT NULL
+            CONSTRAINT FK_CatalogProducts_Catalogs REFERENCES dbo.Catalogs (Id) ON DELETE CASCADE,
+        ProductId UNIQUEIDENTIFIER NOT NULL
+            CONSTRAINT FK_CatalogProducts_Products REFERENCES dbo.Products (Id),
+        CONSTRAINT PK_CatalogProducts PRIMARY KEY (CatalogId, ProductId));
+END
+
+GO

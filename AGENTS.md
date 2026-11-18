@@ -53,7 +53,7 @@ dependencies so the API can run from the IDE. The first reuses the second throug
 `extends`; both share container names, so stop one before starting the other:
 
 ```powershell
-Copy-Item .env.example .env   # then set MSSQL_SA_PASSWORD in .env
+Copy-Item .env.example .env                               # then set MSSQL_SA_PASSWORD in .env
 docker compose up --build -d                              # full stack
 docker compose -f docker-compose.dependencies.yml up -d   # dependencies only
 docker compose down -v                                    # stop and drop the data volume

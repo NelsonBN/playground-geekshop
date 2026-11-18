@@ -14,7 +14,7 @@ public sealed class Catalog
 
     public static Catalog Create(string name, string? description)
     {
-        Validate(name, description);
+        _validate(name, description);
 
         return new()
         {
@@ -26,13 +26,13 @@ public sealed class Catalog
 
     public void Update(string name, string? description)
     {
-        Validate(name, description);
+        _validate(name, description);
 
         Name = name;
         Description = description;
     }
 
-    private static void Validate(string name, string? description)
+    private static void _validate(string name, string? description)
     {
         if(string.IsNullOrWhiteSpace(name))
         {

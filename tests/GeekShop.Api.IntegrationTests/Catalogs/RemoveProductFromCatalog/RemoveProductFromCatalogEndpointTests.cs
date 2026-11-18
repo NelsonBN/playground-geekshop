@@ -52,6 +52,26 @@ public sealed class RemoveProductFromCatalogEndpointTests(DatabaseFixture databa
     }
 
     [Fact]
+    public async Task Given_ConcurrentRequests_When_RemoveSameProduct_Then_AllReturnNoContent()
+    {
+        // Arrange
+        var client = _factory.CreateClient();
+        var productId = await ProductsApi.CreateAsync(client, ProductsApi.NewAddRequest());
+        var id = await CatalogsApi.CreateAsync(client, CatalogsApi.NewAddRequest());
+        await CatalogsApi.AddProductAsync(client, id, productId);
+
+        // Act
+        var responses = await Task.WhenAll(Enumerable.Range(0, 20).Select(_ => client.DeleteAsync(
+            $"/catalogs/{id}/products/{productId}", TestContext.Current.CancellationToken)));
+
+        // Assert
+        responses.Select(r => r.StatusCode).Should().AllBeEquivalentTo(HttpStatusCode.NoContent);
+        var catalog = await client.GetFromJsonAsync<GetCatalogResponse>(
+            $"/catalogs/{id}", TestContext.Current.CancellationToken);
+        catalog!.Products.Should().BeEmpty();
+    }
+
+    [Fact]
     public async Task Given_UnknownProduct_When_RemoveProduct_Then_ReturnsNotFound()
     {
         // Arrange

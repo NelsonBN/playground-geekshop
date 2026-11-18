@@ -56,17 +56,11 @@ internal sealed class CatalogsRepository(CatalogsDbContext context) : ICatalogsR
         }
     }
 
+    // A single statement: a membership already removed by a concurrent request is a no-op, not an error.
     public async Task RemoveProductAsync(Guid catalogId, Guid productId, CancellationToken cancellationToken)
-    {
-        var link = await context.CatalogProducts.FindAsync([catalogId, productId], cancellationToken);
-        if(link is null)
-        {
-            return;
-        }
-
-        context.CatalogProducts.Remove(link);
-        await context.SaveChangesAsync(cancellationToken);
-    }
+        => await context.CatalogProducts
+            .Where(l => l.CatalogId == catalogId && l.ProductId == productId)
+            .ExecuteDeleteAsync(cancellationToken);
 
     public async Task<IReadOnlyCollection<Product>> ListProductsAsync(
         Guid catalogId,

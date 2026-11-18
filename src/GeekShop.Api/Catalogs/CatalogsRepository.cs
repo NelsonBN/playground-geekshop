@@ -1,10 +1,14 @@
 using GeekShop.Api.Products;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 
 namespace GeekShop.Api.Catalogs;
 
 internal sealed class CatalogsRepository(CatalogsDbContext context) : ICatalogsRepository
 {
+    // SQL Server error: violation of a PRIMARY KEY constraint.
+    private const int DUPLICATE_KEY = 2627;
+
     public async Task<IReadOnlyCollection<Catalog>> ListAsync(CancellationToken cancellationToken)
         => await context.Catalogs.AsNoTracking().ToListAsync(cancellationToken);
 
@@ -40,14 +44,16 @@ internal sealed class CatalogsRepository(CatalogsDbContext context) : ICatalogsR
 
     public async Task AddProductAsync(Guid catalogId, Guid productId, CancellationToken cancellationToken)
     {
-        if(await context.CatalogProducts.AnyAsync(
-            l => l.CatalogId == catalogId && l.ProductId == productId, cancellationToken))
-        {
-            return;
-        }
-
         context.CatalogProducts.Add(new CatalogProduct { CatalogId = catalogId, ProductId = productId });
-        await context.SaveChangesAsync(cancellationToken);
+
+        try
+        {
+            await context.SaveChangesAsync(cancellationToken);
+        }
+        catch(DbUpdateException exception) when(exception.InnerException is SqlException { Number: DUPLICATE_KEY })
+        {
+            // The product is already in the catalog (possibly added by a concurrent request): adding is idempotent.
+        }
     }
 
     public async Task RemoveProductAsync(Guid catalogId, Guid productId, CancellationToken cancellationToken)

@@ -34,6 +34,25 @@ public sealed class AddProductToCatalogEndpointTests(DatabaseFixture database) :
     }
 
     [Fact]
+    public async Task Given_ConcurrentRequests_When_AddSameProduct_Then_AllReturnNoContentWithSingleEntry()
+    {
+        // Arrange
+        var client = _factory.CreateClient();
+        var productId = await ProductsApi.CreateAsync(client, ProductsApi.NewAddRequest());
+        var id = await CatalogsApi.CreateAsync(client, CatalogsApi.NewAddRequest());
+
+        // Act
+        var responses = await Task.WhenAll(Enumerable.Range(0, 20).Select(_ => client.PutAsync(
+            $"/catalogs/{id}/products/{productId}", null, TestContext.Current.CancellationToken)));
+
+        // Assert
+        responses.Select(r => r.StatusCode).Should().AllBeEquivalentTo(HttpStatusCode.NoContent);
+        var catalog = await client.GetFromJsonAsync<GetCatalogResponse>(
+            $"/catalogs/{id}", TestContext.Current.CancellationToken);
+        catalog!.Products.Should().ContainSingle().Which.Id.Should().Be(productId);
+    }
+
+    [Fact]
     public async Task Given_UnknownProduct_When_AddProduct_Then_ReturnsNotFound()
     {
         // Arrange

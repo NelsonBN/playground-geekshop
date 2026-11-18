@@ -16,6 +16,7 @@ public sealed class DeleteProductUseCaseTests
         var id = Guid.NewGuid();
         _repository.ExistsAsync(id, TestContext.Current.CancellationToken).Returns(true);
         _catalogs.ListByProductAsync(id, TestContext.Current.CancellationToken).Returns([]);
+        _repository.DeleteAsync(id, TestContext.Current.CancellationToken).Returns(true);
         var useCase = new DeleteProductUseCase(_repository, _catalogs);
 
         // Act
@@ -24,6 +25,23 @@ public sealed class DeleteProductUseCaseTests
         // Assert
         result.Should().Be(DeleteProductResult.Deleted);
         await _repository.Received(1).DeleteAsync(id, TestContext.Current.CancellationToken);
+    }
+
+    [Fact]
+    public async Task Given_ProductAddedToACatalogMeanwhile_When_Handle_Then_ReturnsInCatalog()
+    {
+        // Arrange
+        var id = Guid.NewGuid();
+        _repository.ExistsAsync(id, TestContext.Current.CancellationToken).Returns(true);
+        _catalogs.ListByProductAsync(id, TestContext.Current.CancellationToken).Returns([]);
+        _repository.DeleteAsync(id, TestContext.Current.CancellationToken).Returns(false);
+        var useCase = new DeleteProductUseCase(_repository, _catalogs);
+
+        // Act
+        var result = await useCase.HandleAsync(id, TestContext.Current.CancellationToken);
+
+        // Assert
+        result.Should().Be(DeleteProductResult.InCatalog);
     }
 
     [Fact]

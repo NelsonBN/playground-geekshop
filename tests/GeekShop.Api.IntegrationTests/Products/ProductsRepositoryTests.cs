@@ -1,3 +1,4 @@
+using GeekShop.Api.Catalogs;
 using GeekShop.Api.IntegrationTests.Fixtures;
 using GeekShop.Api.Products;
 using Microsoft.Extensions.DependencyInjection;
@@ -100,9 +101,10 @@ public sealed class ProductsRepositoryTests(DatabaseFixture database) : IAsyncDi
         var repository = _repositoryOf(scope);
 
         // Act
-        await repository.DeleteAsync(product.Id, TestContext.Current.CancellationToken);
+        var deleted = await repository.DeleteAsync(product.Id, TestContext.Current.CancellationToken);
 
         // Assert
+        deleted.Should().BeTrue();
         var exists = await repository.ExistsAsync(product.Id, TestContext.Current.CancellationToken);
         exists.Should().BeFalse();
     }
@@ -119,6 +121,26 @@ public sealed class ProductsRepositoryTests(DatabaseFixture database) : IAsyncDi
 
         // Assert
         await act.Should().NotThrowAsync();
+    }
+
+    [Fact]
+    public async Task Given_ProductInCatalog_When_Delete_Then_ReturnsFalseAndKeepsIt()
+    {
+        // Arrange
+        var product = await _seedAsync();
+        await using var scope = _factory.Services.CreateAsyncScope();
+        var catalogs = scope.ServiceProvider.GetRequiredService<ICatalogsRepository>();
+        var catalog = Catalog.Create($"Summer-{Guid.NewGuid()}", null);
+        await catalogs.AddAsync(catalog, TestContext.Current.CancellationToken);
+        await catalogs.AddProductAsync(catalog.Id, product.Id, TestContext.Current.CancellationToken);
+        var repository = _repositoryOf(scope);
+
+        // Act
+        var deleted = await repository.DeleteAsync(product.Id, TestContext.Current.CancellationToken);
+
+        // Assert
+        deleted.Should().BeFalse();
+        (await repository.ExistsAsync(product.Id, TestContext.Current.CancellationToken)).Should().BeTrue();
     }
 
     [Fact]

@@ -16,8 +16,9 @@ public sealed class DeleteProductUseCase(IProductsRepository repository, ICatalo
             return DeleteProductResult.InCatalog;
         }
 
-        await repository.DeleteAsync(id, cancellationToken);
-
-        return DeleteProductResult.Deleted;
+        // The repository also refuses when a catalog got the product after the check above.
+        return await repository.DeleteAsync(id, cancellationToken)
+            ? DeleteProductResult.Deleted
+            : DeleteProductResult.InCatalog;
     }
 }

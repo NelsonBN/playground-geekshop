@@ -16,7 +16,9 @@ Requirements, all verified with Stryker 5.1.0:
 
 - A solution file (`.sln` or `.slnx`) at the repository root. Stryker then runs in solution context, where `--test-project` / `test-projects` is **rejected**; it finds the test projects from the solution. Use `--project <Source>.csproj` to limit it to one source project.
 - Add `StrykerOutput/` to `.gitignore`.
-- There is no `stryker-config.json` and no threshold parameters: Stryker uses its default thresholds (break 0, low 60, high 80).
+- No threshold, runner or coverage parameters are passed to Stryker: it uses its defaults (thresholds break 0, low 60, high 80; `vstest` runner; `perTest` coverage analysis).
+- Run Stryker from the folder that contains the solution file; the output folder option is `-O` / `--output` (capital O, `-o` opens the report).
+- Validate every run: the log shows `Number of tests found: N` with `N > 0` for each source project that has tests, and the score is plausible (exactly 0% with no error means the tests don't see the mutated code).
 
 ## Run
 

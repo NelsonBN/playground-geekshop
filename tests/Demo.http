@@ -45,3 +45,46 @@ Content-Type: application/json
 ###
 
 DELETE {{Host}}/products/c135c415-7211-426a-8b89-33936920e660
+
+
+###
+
+GET {{Host}}/catalogs
+Accept: application/json
+
+###
+
+GET {{Host}}/catalogs/c135c415-7211-426a-8b89-33936920e661
+Accept: application/json
+
+###
+
+POST {{Host}}/catalogs
+Content-Type: application/json
+
+{
+    "name": "Catalog 1",
+    "description": "My first catalog"
+}
+
+###
+
+PUT {{Host}}/catalogs/c135c415-7211-426a-8b89-33936920e661
+Content-Type: application/json
+
+{
+    "name": "Catalog 2",
+    "description": "Renamed catalog"
+}
+
+###
+
+PUT {{Host}}/catalogs/c135c415-7211-426a-8b89-33936920e661/products/c135c415-7211-426a-8b89-33936920e660
+
+###
+
+DELETE {{Host}}/catalogs/c135c415-7211-426a-8b89-33936920e661/products/c135c415-7211-426a-8b89-33936920e660
+
+###
+
+DELETE {{Host}}/catalogs/c135c415-7211-426a-8b89-33936920e661

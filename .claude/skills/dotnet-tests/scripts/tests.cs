@@ -406,7 +406,7 @@ static class TestRunner
         var failures = new List<string>();
         foreach (var project in projects)
         {
-            var (exit, output) = ExecLogged(integration ? "integration.log" : "unit.log", "dotnet", ["test", "--project", project]);
+            var (exit, output) = ExecLogged(integration ? "integration.log" : "unit.log", "dotnet", ["test", project]);
             Out.WriteLine($"{(exit == 0 ? "PASS" : "FAIL")} {Path.GetFileName(project)} ({(integration ? "integration" : "unit")})");
             if (exit != 0)
             {
@@ -457,9 +457,9 @@ static class TestRunner
         {
             List<string> arguments =
             [
-                "test", "--project", project,
+                "test", project,
                 "--results-directory", Path.GetFullPath(resultsDir),
-                "--coverage", "--coverage-output-format", "cobertura", "--coverage-output", "coverage.cobertura.xml",
+                "--collect", "XPlat Code Coverage",
             ];
             var (exit, output) = ExecLogged("coverage.log", "dotnet", arguments);
             if (exit != 0)
@@ -474,7 +474,7 @@ static class TestRunner
         var reports = Directory.Exists(resultsDir) ? Directory.GetFiles(resultsDir, "*.cobertura*.xml", SearchOption.AllDirectories) : [];
         if (reports.Length == 0)
         {
-            throw new ToolException("no Cobertura report was produced; configure a coverage collector for the test projects (see references/quality-gate.md).");
+            throw new ToolException("no Cobertura report was produced; add `coverlet.collector` to the test projects (see references/quality-gate.md).");
         }
 
         var coverage = ParseCobertura(reports);

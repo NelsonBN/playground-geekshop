@@ -1,4 +1,3 @@
-using System.Net;
 using GeekShop.Api.IntegrationTests.Fixtures;
 
 namespace GeekShop.Api.IntegrationTests.Setup;
@@ -22,10 +21,10 @@ public sealed class HealthSetupTests(DatabaseFixture database)
         var client = factory.CreateClient();
 
         // Act
-        var response = await client.GetAsync(path, TestContext.Current.CancellationToken);
+        var response = await client.GetAsync(path, CancellationToken.None);
 
         // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        response.Should().Be200Ok();
     }
 
     [Theory]
@@ -38,10 +37,10 @@ public sealed class HealthSetupTests(DatabaseFixture database)
         var client = factory.CreateClient();
 
         // Act
-        var response = await client.GetAsync(path, TestContext.Current.CancellationToken);
+        var response = await client.GetAsync(path, CancellationToken.None);
 
         // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.ServiceUnavailable);
+        response.Should().Be503ServiceUnavailable();
     }
 
     [Fact]
@@ -52,9 +51,9 @@ public sealed class HealthSetupTests(DatabaseFixture database)
         var client = factory.CreateClient();
 
         // Act
-        var response = await client.GetAsync("/healthz/live", TestContext.Current.CancellationToken);
+        var response = await client.GetAsync("/healthz/live", CancellationToken.None);
 
         // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        response.Should().Be200Ok();
     }
 }

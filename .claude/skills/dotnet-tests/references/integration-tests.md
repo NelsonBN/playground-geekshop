@@ -32,10 +32,10 @@ Write them only for what a unit test cannot prove: behaviour that only exists ag
 
 ```csharp
 // Act
-var response = await client.GetAsync("/orders/42", TestContext.Current.CancellationToken);
+var response = await client.GetAsync("/orders/42", CancellationToken.None);
 
 // Assert
 response.Should().Be200Ok().And.BeAs(new { Id = 42, Status = "Placed" });
 ```
 
-Full example: [../examples/IntegrationTest.cs.example](../examples/IntegrationTest.cs.example). Run: `dotnet test --project <P>.IntegrationTests.csproj` (wrapped by `tests.cs integration`).
+Full example: [../examples/IntegrationTest.cs.example](../examples/IntegrationTest.cs.example). Run: `dotnet test <P>.IntegrationTests.csproj` (wrapped by `tests.cs integration`).

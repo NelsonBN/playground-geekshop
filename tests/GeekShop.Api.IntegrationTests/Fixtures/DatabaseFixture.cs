@@ -19,7 +19,7 @@ public sealed class DatabaseFixture : IAsyncLifetime
         InitialCatalog = DATABASE
     }.ConnectionString;
 
-    public async ValueTask InitializeAsync()
+    public async Task InitializeAsync()
     {
         await _container.StartAsync();
 
@@ -31,7 +31,7 @@ public sealed class DatabaseFixture : IAsyncLifetime
         }
     }
 
-    public async ValueTask DisposeAsync()
+    public async Task DisposeAsync()
         => await _container.DisposeAsync();
 }
 

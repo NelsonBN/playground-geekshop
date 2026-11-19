@@ -1,3 +1,4 @@
+using GeekShop.Api.Catalogs;
 using GeekShop.Api.IntegrationTests.Fixtures;
 using GeekShop.Api.Products;
 using Microsoft.Extensions.DependencyInjection;
@@ -23,7 +24,7 @@ public sealed class ProductsRepositoryTests(DatabaseFixture database) : IAsyncDi
     {
         var product = _newProduct();
         await using var scope = _factory.Services.CreateAsyncScope();
-        await _repositoryOf(scope).AddAsync(product, TestContext.Current.CancellationToken);
+        await _repositoryOf(scope).AddAsync(product, CancellationToken.None);
 
         return product;
     }
@@ -37,7 +38,7 @@ public sealed class ProductsRepositoryTests(DatabaseFixture database) : IAsyncDi
         var repository = _repositoryOf(scope);
 
         // Act
-        var result = await repository.GetAsync(product.Id, TestContext.Current.CancellationToken);
+        var result = await repository.GetAsync(product.Id, CancellationToken.None);
 
         // Assert
         result.Should().BeEquivalentTo(product);
@@ -51,7 +52,7 @@ public sealed class ProductsRepositoryTests(DatabaseFixture database) : IAsyncDi
         var repository = _repositoryOf(scope);
 
         // Act
-        var result = await repository.GetAsync(Guid.NewGuid(), TestContext.Current.CancellationToken);
+        var result = await repository.GetAsync(Guid.NewGuid(), CancellationToken.None);
 
         // Assert
         result.Should().BeNull();
@@ -66,7 +67,7 @@ public sealed class ProductsRepositoryTests(DatabaseFixture database) : IAsyncDi
         var repository = _repositoryOf(scope);
 
         // Act
-        var result = await repository.ListAsync(TestContext.Current.CancellationToken);
+        var result = await repository.ListAsync(CancellationToken.None);
 
         // Assert
         result.Should().ContainEquivalentOf(product);
@@ -82,12 +83,12 @@ public sealed class ProductsRepositoryTests(DatabaseFixture database) : IAsyncDi
         var changed = new Product { Id = product.Id, Name = $"Changed-{product.Id}", Quantity = 9, Price = 1.25 };
 
         // Act
-        await repository.UpdateAsync(changed, TestContext.Current.CancellationToken);
+        await repository.UpdateAsync(changed, CancellationToken.None);
 
         // Assert
         await using var verification = _factory.Services.CreateAsyncScope();
         var stored = await _repositoryOf(verification).GetAsync(
-            product.Id, TestContext.Current.CancellationToken);
+            product.Id, CancellationToken.None);
         stored.Should().BeEquivalentTo(changed);
     }
 
@@ -100,10 +101,11 @@ public sealed class ProductsRepositoryTests(DatabaseFixture database) : IAsyncDi
         var repository = _repositoryOf(scope);
 
         // Act
-        await repository.DeleteAsync(product.Id, TestContext.Current.CancellationToken);
+        var deleted = await repository.DeleteAsync(product.Id, CancellationToken.None);
 
         // Assert
-        var exists = await repository.ExistsAsync(product.Id, TestContext.Current.CancellationToken);
+        deleted.Should().BeTrue();
+        var exists = await repository.ExistsAsync(product.Id, CancellationToken.None);
         exists.Should().BeFalse();
     }
 
@@ -115,10 +117,30 @@ public sealed class ProductsRepositoryTests(DatabaseFixture database) : IAsyncDi
         var repository = _repositoryOf(scope);
 
         // Act
-        var act = () => repository.DeleteAsync(Guid.NewGuid(), TestContext.Current.CancellationToken);
+        var act = () => repository.DeleteAsync(Guid.NewGuid(), CancellationToken.None);
 
         // Assert
         await act.Should().NotThrowAsync();
+    }
+
+    [Fact]
+    public async Task Given_ProductInCatalog_When_Delete_Then_ReturnsFalseAndKeepsIt()
+    {
+        // Arrange
+        var product = await _seedAsync();
+        await using var scope = _factory.Services.CreateAsyncScope();
+        var catalogs = scope.ServiceProvider.GetRequiredService<ICatalogsRepository>();
+        var catalog = Catalog.Create($"Summer-{Guid.NewGuid()}", null);
+        await catalogs.AddAsync(catalog, CancellationToken.None);
+        await catalogs.AddProductAsync(catalog.Id, product.Id, CancellationToken.None);
+        var repository = _repositoryOf(scope);
+
+        // Act
+        var deleted = await repository.DeleteAsync(product.Id, CancellationToken.None);
+
+        // Assert
+        deleted.Should().BeFalse();
+        (await repository.ExistsAsync(product.Id, CancellationToken.None)).Should().BeTrue();
     }
 
     [Fact]
@@ -130,7 +152,7 @@ public sealed class ProductsRepositoryTests(DatabaseFixture database) : IAsyncDi
         var repository = _repositoryOf(scope);
 
         // Act
-        var result = await repository.ExistsAsync(product.Id, TestContext.Current.CancellationToken);
+        var result = await repository.ExistsAsync(product.Id, CancellationToken.None);
 
         // Assert
         result.Should().BeTrue();
@@ -144,7 +166,7 @@ public sealed class ProductsRepositoryTests(DatabaseFixture database) : IAsyncDi
         var repository = _repositoryOf(scope);
 
         // Act
-        var result = await repository.ExistsAsync(Guid.NewGuid(), TestContext.Current.CancellationToken);
+        var result = await repository.ExistsAsync(Guid.NewGuid(), CancellationToken.None);
 
         // Assert
         result.Should().BeFalse();

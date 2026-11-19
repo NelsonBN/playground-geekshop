@@ -1,6 +1,8 @@
+using GeekShop.Api.Catalogs;
+
 namespace GeekShop.Api.Products.GetProduct;
 
-public sealed class GetProductUseCase(IProductsRepository repository)
+public sealed class GetProductUseCase(IProductsRepository repository, ICatalogsRepository catalogs)
 {
     public async Task<GetProductResponse?> HandleAsync(Guid id, CancellationToken cancellationToken)
     {
@@ -11,6 +13,13 @@ public sealed class GetProductUseCase(IProductsRepository repository)
             return null;
         }
 
-        return new(product.Id, product.Name, product.Quantity, product.Price);
+        var productCatalogs = await catalogs.ListByProductAsync(id, cancellationToken);
+
+        return new(
+            product.Id,
+            product.Name,
+            product.Quantity,
+            product.Price,
+            [.. productCatalogs.Select(c => new ProductCatalogResponse(c.Id, c.Name))]);
     }
 }

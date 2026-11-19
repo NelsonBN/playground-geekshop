@@ -8,13 +8,13 @@ internal static class DeleteProductEndpoint
             Guid id,
             CancellationToken cancellationToken) =>
         {
-            var deleted = await useCase.HandleAsync(id, cancellationToken);
+            var result = await useCase.HandleAsync(id, cancellationToken);
 
-            if(!deleted)
+            return result switch
             {
-                return Results.NotFound();
-            }
-
-            return Results.NoContent();
+                DeleteProductResult.NotFound => Results.NotFound(),
+                DeleteProductResult.InCatalog => Results.Conflict(),
+                _ => Results.NoContent()
+            };
         });
 }

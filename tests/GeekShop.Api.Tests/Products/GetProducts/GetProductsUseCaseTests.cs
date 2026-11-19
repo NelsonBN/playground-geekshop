@@ -12,11 +12,11 @@ public sealed class GetProductsUseCaseTests
         var first = new Product { Id = Guid.NewGuid(), Name = "A", Quantity = 1, Price = 1 };
         var second = new Product { Id = Guid.NewGuid(), Name = "B", Quantity = 2, Price = 2 };
         var repository = Substitute.For<IProductsRepository>();
-        repository.ListAsync(TestContext.Current.CancellationToken).Returns([first, second]);
+        repository.ListAsync(CancellationToken.None).Returns([first, second]);
         var useCase = new GetProductsUseCase(repository);
 
         // Act
-        var result = await useCase.HandleAsync(TestContext.Current.CancellationToken);
+        var result = await useCase.HandleAsync(CancellationToken.None);
 
         // Assert
         result.Should().Equal(
@@ -29,11 +29,11 @@ public sealed class GetProductsUseCaseTests
     {
         // Arrange
         var repository = Substitute.For<IProductsRepository>();
-        repository.ListAsync(TestContext.Current.CancellationToken).Returns([]);
+        repository.ListAsync(CancellationToken.None).Returns([]);
         var useCase = new GetProductsUseCase(repository);
 
         // Act
-        var result = await useCase.HandleAsync(TestContext.Current.CancellationToken);
+        var result = await useCase.HandleAsync(CancellationToken.None);
 
         // Assert
         result.Should().BeEmpty();

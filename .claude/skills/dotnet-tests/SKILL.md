@@ -1,6 +1,6 @@
 ---
 name: dotnet-tests
-description: 'Write, run and gate tests for .NET code: unit tests (xunit, AwesomeAssertions, NSubstitute), narrow integration tests (Testcontainers, WebApplicationFactory, Assertions.Web) and mutation tests (Stryker.NET), all in one fixed Arrange-Act-Assert / Given_When_Then pattern, with a coverage gate (ReportGenerator) and a Stop hook that sends the agent back to finish the tests when they fail or coverage is too low. Test-first (TDD: red, fix, green) is mandatory for every fix or change made by an AI. Use when fixing a bug, a ticket, an issue, a review comment, a debug finding or any instruction (reproduce with a failing test first), implementing or changing a feature, adding or reviewing tests, checking coverage, killing surviving mutants, or before declaring a change done. Command form: /dotnet-tests [unit|integration|coverage|mutation|quality|all].'
+description: 'Write, run and gate tests for .NET code: unit tests, narrow integration tests and mutation tests, all in one fixed Arrange-Act-Assert / Given_When_Then pattern, with a coverage gate. Test-first (TDD: red, fix, green) is mandatory for every fix or change made by an AI. Use when fixing a bug, a ticket, an issue, a review comment, a debug finding or any instruction (reproduce with a failing test first), implementing or changing a feature, adding or reviewing tests, checking coverage, killing surviving mutants, or before declaring a change done. Command form: /dotnet-tests [unit|integration|coverage|mutation|quality|all].'
 argument-hint: '[unit|integration|coverage|mutation|quality|all]'
 license: MIT
 allowed-tools: Bash(dotnet:*), Bash(reportgenerator:*), Bash(docker:*), Bash(git:*), PowerShell(dotnet:*), PowerShell(reportgenerator:*), PowerShell(docker:*), PowerShell(git:*), Read, Edit, Write, Grep, Glob
@@ -15,7 +15,7 @@ Every feature or fix ships with tests that prove it works and keep it working. D
 > For **every** issue, whatever its source (ticket, review comment, prompt instruction, debug session, failing build) and for new behaviour:
 >
 > 1. **Write the test first** (unit, or integration when the bug needs real infrastructure) that reproduces the problem.
-> 2. **Red:** run only that test (`dotnet test --project <P>.Tests.csproj --filter-display-name "*<test>*"`) and watch it fail on an assertion that states the symptom. A test that passes, does not compile, or matches nothing is not a red. Quote the failure message in your reply.
+> 2. **Red:** run only that test (`dotnet test <P>.Tests.csproj --filter "DisplayName~<test>"`) and watch it fail on an assertion that states the symptom. A test that passes, does not compile, or matches nothing is not a red. Quote the failure message in your reply.
 > 3. **Fix** with the smallest production change. Never edit the test to make it pass.
 > 4. **Green:** run the same test again, watch it pass, say so.
 > 5. **Refactor** only while green, then run the gates.

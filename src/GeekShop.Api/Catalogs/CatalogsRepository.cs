@@ -1,0 +1,82 @@
+using GeekShop.Api.Products;
+using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
+
+namespace GeekShop.Api.Catalogs;
+
+internal sealed class CatalogsRepository(CatalogsDbContext context) : ICatalogsRepository
+{
+    // SQL Server error: violation of a PRIMARY KEY constraint.
+    private const int DUPLICATE_KEY = 2627;
+
+    public async Task<IReadOnlyCollection<Catalog>> ListAsync(CancellationToken cancellationToken)
+        => await context.Catalogs.AsNoTracking().ToListAsync(cancellationToken);
+
+    public Task<Catalog?> GetAsync(Guid id, CancellationToken cancellationToken)
+        => context.Catalogs.AsNoTracking().FirstOrDefaultAsync(c => c.Id == id, cancellationToken);
+
+    public async Task AddAsync(Catalog catalog, CancellationToken cancellationToken)
+    {
+        context.Catalogs.Add(catalog);
+        await context.SaveChangesAsync(cancellationToken);
+    }
+
+    public async Task UpdateAsync(Catalog catalog, CancellationToken cancellationToken)
+    {
+        context.Catalogs.Update(catalog);
+        await context.SaveChangesAsync(cancellationToken);
+    }
+
+    public async Task DeleteAsync(Guid id, CancellationToken cancellationToken)
+    {
+        var catalog = await context.Catalogs.FindAsync([id], cancellationToken);
+        if(catalog is null)
+        {
+            return;
+        }
+
+        context.Catalogs.Remove(catalog);
+        await context.SaveChangesAsync(cancellationToken);
+    }
+
+    public Task<bool> ExistsAsync(Guid id, CancellationToken cancellationToken)
+        => context.Catalogs.AnyAsync(c => c.Id == id, cancellationToken);
+
+    public async Task AddProductAsync(Guid catalogId, Guid productId, CancellationToken cancellationToken)
+    {
+        context.CatalogProducts.Add(new CatalogProduct { CatalogId = catalogId, ProductId = productId });
+
+        try
+        {
+            await context.SaveChangesAsync(cancellationToken);
+        }
+        catch(DbUpdateException exception) when(exception.InnerException is SqlException { Number: DUPLICATE_KEY })
+        {
+            // The product is already in the catalog (possibly added by a concurrent request): adding is idempotent.
+        }
+    }
+
+    // A single statement: a membership already removed by a concurrent request is a no-op, not an error.
+    public async Task RemoveProductAsync(Guid catalogId, Guid productId, CancellationToken cancellationToken)
+        => await context.CatalogProducts
+            .Where(l => l.CatalogId == catalogId && l.ProductId == productId)
+            .ExecuteDeleteAsync(cancellationToken);
+
+    public async Task<IReadOnlyCollection<Product>> ListProductsAsync(
+        Guid catalogId,
+        CancellationToken cancellationToken)
+        => await context.CatalogProducts
+            .AsNoTracking()
+            .Where(l => l.CatalogId == catalogId)
+            .Join(context.Products, l => l.ProductId, p => p.Id, (_, p) => p)
+            .ToListAsync(cancellationToken);
+
+    public async Task<IReadOnlyCollection<Catalog>> ListByProductAsync(
+        Guid productId,
+        CancellationToken cancellationToken)
+        => await context.CatalogProducts
+            .AsNoTracking()
+            .Where(l => l.ProductId == productId)
+            .Join(context.Catalogs, l => l.CatalogId, c => c.Id, (_, c) => c)
+            .ToListAsync(cancellationToken);
+}

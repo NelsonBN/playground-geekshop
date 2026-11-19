@@ -59,7 +59,7 @@ act.Should().Throw<InvalidOperationException>().WithMessage("*insufficient*");
 
 ## Async
 
-Return `Task`, `await` the Act, use `await act.Should().ThrowAsync<T>()`. Never `.Result` or `.Wait()`. Pass `TestContext.Current.CancellationToken` (xunit v3) to async calls.
+Return `Task`, `await` the Act, use `await act.Should().ThrowAsync<T>()`. Never `.Result` or `.Wait()`. Pass `CancellationToken.None` to async calls.
 
 ## Time, randomness, IO
 

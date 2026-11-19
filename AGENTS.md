@@ -16,6 +16,8 @@ The intended stack is:
 ### Features
 
 - Product management.
+- Catalog management (catalogs group products; products can be added to and
+  removed from catalogs).
 
 For the user-facing feature list, API routes, health checks and run
 instructions, read [`README.md`](README.md) when you need that context (for
@@ -51,7 +53,7 @@ dependencies so the API can run from the IDE. The first reuses the second throug
 `extends`; both share container names, so stop one before starting the other:
 
 ```powershell
-Copy-Item .env.example .env   # then set MSSQL_SA_PASSWORD in .env
+Copy-Item .env.example .env                               # then set MSSQL_SA_PASSWORD in .env
 docker compose up --build -d                              # full stack
 docker compose -f docker-compose.dependencies.yml up -d   # dependencies only
 docker compose down -v                                    # stop and drop the data volume
@@ -61,8 +63,8 @@ Never commit `.env` or put a password in a tracked file.
 
 ### Test
 
-Test projects live under `tests/` and `global.json` selects the Microsoft
-Testing Platform runner. Follow the
+Test projects live under `tests/` and use `dotnet test`.
+Follow the
 [`dotnet-tests` skill](.claude/skills/dotnet-tests/SKILL.md) for the required
 project layout, test-first workflow and quality gates.
 
@@ -116,6 +118,10 @@ tests/
   business capability and use case, keeping each endpoint and its request,
   response and business logic together. Extract shared code or persistence
   infrastructure only when genuinely needed.
+- Follow **domain-driven design** modeling: entities and value objects own and
+  enforce their rules (validation, invariants, state changes) and expose
+  behavior through factory and domain methods with private setters, instead of
+  anemic data bags. Use cases orchestrate; they do not hold the entity's rules.
 - Use dependency injection for dependencies.
 
 ## Agent Skills

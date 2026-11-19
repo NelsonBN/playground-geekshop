@@ -1,14 +1,15 @@
 # GeekShop
 
 Backend API for a shop, built with .NET 11 and ASP.NET Core Minimal APIs. It
-currently manages products, stored in SQL Server through EF Core.
+currently manages products and catalogs, stored in SQL Server through EF Core.
 
-## Features
+## Business Features
 
 - **Product management**: add, view, list, update and delete products.
-- **Health monitoring**: startup, liveness and readiness probes for containers
-  and orchestrators.
-- **Easy local setup**: run everything, or only the dependencies, with Docker.
+- **Catalog management**: create, view, list, update and delete catalogs, and
+  add or remove the products they contain. A catalog shows its products and a
+  product shows the catalogs it belongs to. Products that belong to a catalog
+  cannot be deleted.
 
 ## Run
 

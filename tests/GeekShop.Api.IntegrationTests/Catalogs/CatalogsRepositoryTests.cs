@@ -25,10 +25,10 @@ public sealed class CatalogsRepositoryTests(DatabaseFixture database) : IAsyncDi
         var repository = scope.ServiceProvider.GetRequiredService<ICatalogsRepository>();
 
         // Act
-        await client.DeleteAsync($"/products/{productId}", TestContext.Current.CancellationToken);
+        await client.DeleteAsync($"/products/{productId}", CancellationToken.None);
 
         // Assert
-        (await repository.ListProductsAsync(catalogId, TestContext.Current.CancellationToken))
+        (await repository.ListProductsAsync(catalogId, CancellationToken.None))
             .Should().ContainSingle().Which.Id.Should().Be(productId);
     }
 
@@ -46,7 +46,7 @@ public sealed class CatalogsRepositoryTests(DatabaseFixture database) : IAsyncDi
         var repository = scope.ServiceProvider.GetRequiredService<ICatalogsRepository>();
 
         // Act
-        var catalogs = await repository.ListByProductAsync(productId, TestContext.Current.CancellationToken);
+        var catalogs = await repository.ListByProductAsync(productId, CancellationToken.None);
 
         // Assert
         catalogs.Select(c => c.Id).Should().BeEquivalentTo([first, second]);

@@ -1,4 +1,3 @@
-using System.Net;
 using GeekShop.Api.IntegrationTests.Fixtures;
 
 namespace GeekShop.Api.IntegrationTests.Catalogs.DeleteCatalog;
@@ -22,14 +21,14 @@ public sealed class DeleteCatalogEndpointTests(DatabaseFixture database) : IAsyn
         await CatalogsApi.AddProductAsync(client, id, productId);
 
         // Act
-        var response = await client.DeleteAsync($"/catalogs/{id}", TestContext.Current.CancellationToken);
+        var response = await client.DeleteAsync($"/catalogs/{id}", CancellationToken.None);
 
         // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.NoContent);
-        (await client.GetAsync($"/catalogs/{id}", TestContext.Current.CancellationToken))
-            .StatusCode.Should().Be(HttpStatusCode.NotFound);
-        (await client.GetAsync($"/products/{productId}", TestContext.Current.CancellationToken))
-            .StatusCode.Should().Be(HttpStatusCode.OK);
+        response.Should().Be204NoContent();
+        (await client.GetAsync($"/catalogs/{id}", CancellationToken.None))
+            .Should().Be404NotFound();
+        (await client.GetAsync($"/products/{productId}", CancellationToken.None))
+            .Should().Be200Ok();
     }
 
     [Fact]
@@ -39,9 +38,9 @@ public sealed class DeleteCatalogEndpointTests(DatabaseFixture database) : IAsyn
         var client = _factory.CreateClient();
 
         // Act
-        var response = await client.DeleteAsync($"/catalogs/{Guid.NewGuid()}", TestContext.Current.CancellationToken);
+        var response = await client.DeleteAsync($"/catalogs/{Guid.NewGuid()}", CancellationToken.None);
 
         // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+        response.Should().Be404NotFound();
     }
 }

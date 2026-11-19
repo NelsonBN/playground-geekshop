@@ -1,6 +1,6 @@
 // Path: tests/Orders.IntegrationTests/Endpoints/OrdersEndpointTests.cs  (project Orders.IntegrationTests)
 // Example only (not compiled): a narrow integration test with a real PostgreSQL (Testcontainers)
-// behind the in-process API (WebApplicationFactory), asserted with Assertions.Web.
+// behind the in-process API (WebApplicationFactory), asserted with AwesomeAssertions.Web.
 // Xunit and AwesomeAssertions come from the implicit usings of the test csproj.
 using System.Net.Http.Json;
 using Microsoft.AspNetCore.Mvc.Testing;

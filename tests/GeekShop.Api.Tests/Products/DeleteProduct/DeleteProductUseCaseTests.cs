@@ -14,17 +14,17 @@ public sealed class DeleteProductUseCaseTests
     {
         // Arrange
         var id = Guid.NewGuid();
-        _repository.ExistsAsync(id, TestContext.Current.CancellationToken).Returns(true);
-        _catalogs.ListByProductAsync(id, TestContext.Current.CancellationToken).Returns([]);
-        _repository.DeleteAsync(id, TestContext.Current.CancellationToken).Returns(true);
+        _repository.ExistsAsync(id, CancellationToken.None).Returns(true);
+        _catalogs.ListByProductAsync(id, CancellationToken.None).Returns([]);
+        _repository.DeleteAsync(id, CancellationToken.None).Returns(true);
         var useCase = new DeleteProductUseCase(_repository, _catalogs);
 
         // Act
-        var result = await useCase.HandleAsync(id, TestContext.Current.CancellationToken);
+        var result = await useCase.HandleAsync(id, CancellationToken.None);
 
         // Assert
         result.Should().Be(DeleteProductResult.Deleted);
-        await _repository.Received(1).DeleteAsync(id, TestContext.Current.CancellationToken);
+        await _repository.Received(1).DeleteAsync(id, CancellationToken.None);
     }
 
     [Fact]
@@ -32,13 +32,13 @@ public sealed class DeleteProductUseCaseTests
     {
         // Arrange
         var id = Guid.NewGuid();
-        _repository.ExistsAsync(id, TestContext.Current.CancellationToken).Returns(true);
-        _catalogs.ListByProductAsync(id, TestContext.Current.CancellationToken).Returns([]);
-        _repository.DeleteAsync(id, TestContext.Current.CancellationToken).Returns(false);
+        _repository.ExistsAsync(id, CancellationToken.None).Returns(true);
+        _catalogs.ListByProductAsync(id, CancellationToken.None).Returns([]);
+        _repository.DeleteAsync(id, CancellationToken.None).Returns(false);
         var useCase = new DeleteProductUseCase(_repository, _catalogs);
 
         // Act
-        var result = await useCase.HandleAsync(id, TestContext.Current.CancellationToken);
+        var result = await useCase.HandleAsync(id, CancellationToken.None);
 
         // Assert
         result.Should().Be(DeleteProductResult.InCatalog);
@@ -49,13 +49,13 @@ public sealed class DeleteProductUseCaseTests
     {
         // Arrange
         var id = Guid.NewGuid();
-        _repository.ExistsAsync(id, TestContext.Current.CancellationToken).Returns(true);
-        _catalogs.ListByProductAsync(id, TestContext.Current.CancellationToken)
+        _repository.ExistsAsync(id, CancellationToken.None).Returns(true);
+        _catalogs.ListByProductAsync(id, CancellationToken.None)
             .Returns([Catalog.Create("Summer", null)]);
         var useCase = new DeleteProductUseCase(_repository, _catalogs);
 
         // Act
-        var result = await useCase.HandleAsync(id, TestContext.Current.CancellationToken);
+        var result = await useCase.HandleAsync(id, CancellationToken.None);
 
         // Assert
         result.Should().Be(DeleteProductResult.InCatalog);
@@ -67,11 +67,11 @@ public sealed class DeleteProductUseCaseTests
     {
         // Arrange
         var id = Guid.NewGuid();
-        _repository.ExistsAsync(id, TestContext.Current.CancellationToken).Returns(false);
+        _repository.ExistsAsync(id, CancellationToken.None).Returns(false);
         var useCase = new DeleteProductUseCase(_repository, _catalogs);
 
         // Act
-        var result = await useCase.HandleAsync(id, TestContext.Current.CancellationToken);
+        var result = await useCase.HandleAsync(id, CancellationToken.None);
 
         // Assert
         result.Should().Be(DeleteProductResult.NotFound);

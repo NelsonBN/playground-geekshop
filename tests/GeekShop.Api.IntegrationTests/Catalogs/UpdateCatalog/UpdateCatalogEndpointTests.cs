@@ -1,4 +1,3 @@
-using System.Net;
 using GeekShop.Api.Catalogs.GetCatalog;
 using GeekShop.Api.Catalogs.UpdateCatalog;
 using GeekShop.Api.IntegrationTests.Fixtures;
@@ -23,12 +22,12 @@ public sealed class UpdateCatalogEndpointTests(DatabaseFixture database) : IAsyn
         var update = new UpdateCatalogRequest { Name = $"Winter-{Guid.NewGuid()}", Description = "Winter deals" };
 
         // Act
-        var response = await client.PutAsJsonAsync($"/catalogs/{id}", update, TestContext.Current.CancellationToken);
+        var response = await client.PutAsJsonAsync($"/catalogs/{id}", update, CancellationToken.None);
 
         // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.NoContent);
+        response.Should().Be204NoContent();
         var stored = await client.GetFromJsonAsync<GetCatalogResponse>(
-            $"/catalogs/{id}", TestContext.Current.CancellationToken);
+            $"/catalogs/{id}", CancellationToken.None);
         stored.Should().BeEquivalentTo(new GetCatalogResponse(id, update.Name, "Winter deals", []));
     }
 
@@ -42,12 +41,12 @@ public sealed class UpdateCatalogEndpointTests(DatabaseFixture database) : IAsyn
         var update = new UpdateCatalogRequest { Name = new string('n', 201) };
 
         // Act
-        var response = await client.PutAsJsonAsync($"/catalogs/{id}", update, TestContext.Current.CancellationToken);
+        var response = await client.PutAsJsonAsync($"/catalogs/{id}", update, CancellationToken.None);
 
         // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        response.Should().Be400BadRequest();
         var stored = await client.GetFromJsonAsync<GetCatalogResponse>(
-            $"/catalogs/{id}", TestContext.Current.CancellationToken);
+            $"/catalogs/{id}", CancellationToken.None);
         stored!.Name.Should().Be(request.Name);
     }
 
@@ -61,9 +60,9 @@ public sealed class UpdateCatalogEndpointTests(DatabaseFixture database) : IAsyn
         var response = await client.PutAsJsonAsync(
             $"/catalogs/{Guid.NewGuid()}",
             new UpdateCatalogRequest { Name = "Winter" },
-            TestContext.Current.CancellationToken);
+            CancellationToken.None);
 
         // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+        response.Should().Be404NotFound();
     }
 }

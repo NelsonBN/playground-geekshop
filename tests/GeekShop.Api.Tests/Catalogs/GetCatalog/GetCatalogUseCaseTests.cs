@@ -13,12 +13,12 @@ public sealed class GetCatalogUseCaseTests
         var catalog = Catalog.Create("Summer", "Deals");
         var product = new Product { Id = Guid.NewGuid(), Name = "Keyboard", Quantity = 5, Price = 19.9 };
         var repository = Substitute.For<ICatalogsRepository>();
-        repository.GetAsync(catalog.Id, TestContext.Current.CancellationToken).Returns(catalog);
-        repository.ListProductsAsync(catalog.Id, TestContext.Current.CancellationToken).Returns([product]);
+        repository.GetAsync(catalog.Id, CancellationToken.None).Returns(catalog);
+        repository.ListProductsAsync(catalog.Id, CancellationToken.None).Returns([product]);
         var useCase = new GetCatalogUseCase(repository);
 
         // Act
-        var result = await useCase.HandleAsync(catalog.Id, TestContext.Current.CancellationToken);
+        var result = await useCase.HandleAsync(catalog.Id, CancellationToken.None);
 
         // Assert
         result.Should().BeEquivalentTo(new GetCatalogResponse(
@@ -34,7 +34,7 @@ public sealed class GetCatalogUseCaseTests
         var useCase = new GetCatalogUseCase(repository);
 
         // Act
-        var result = await useCase.HandleAsync(Guid.NewGuid(), TestContext.Current.CancellationToken);
+        var result = await useCase.HandleAsync(Guid.NewGuid(), CancellationToken.None);
 
         // Assert
         result.Should().BeNull();

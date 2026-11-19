@@ -1,4 +1,3 @@
-using System.Net;
 using GeekShop.Api.Catalogs.AddCatalog;
 using GeekShop.Api.Catalogs.GetCatalog;
 using GeekShop.Api.IntegrationTests.Fixtures;
@@ -22,13 +21,13 @@ public sealed class AddCatalogEndpointTests(DatabaseFixture database) : IAsyncDi
         var request = CatalogsApi.NewAddRequest();
 
         // Act
-        var response = await client.PostAsJsonAsync("/catalogs", request, TestContext.Current.CancellationToken);
+        var response = await client.PostAsJsonAsync("/catalogs", request, CancellationToken.None);
 
         // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.Created);
-        var id = await response.Content.ReadFromJsonAsync<Guid>(TestContext.Current.CancellationToken);
+        response.Should().Be201Created();
+        var id = await response.Content.ReadFromJsonAsync<Guid>(CancellationToken.None);
         var stored = await client.GetFromJsonAsync<GetCatalogResponse>(
-            $"/catalogs/{id}", TestContext.Current.CancellationToken);
+            $"/catalogs/{id}", CancellationToken.None);
         stored.Should().BeEquivalentTo(new GetCatalogResponse(id, request.Name, request.Description, []));
     }
 
@@ -48,10 +47,10 @@ public sealed class AddCatalogEndpointTests(DatabaseFixture database) : IAsyncDi
         };
 
         // Act
-        var response = await client.PostAsJsonAsync("/catalogs", request, TestContext.Current.CancellationToken);
+        var response = await client.PostAsJsonAsync("/catalogs", request, CancellationToken.None);
 
         // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        response.Should().Be400BadRequest();
     }
 
     [Fact]
@@ -62,11 +61,11 @@ public sealed class AddCatalogEndpointTests(DatabaseFixture database) : IAsyncDi
         var request = new AddCatalogRequest { Name = " " };
 
         // Act
-        var response = await client.PostAsJsonAsync("/catalogs", request, TestContext.Current.CancellationToken);
+        var response = await client.PostAsJsonAsync("/catalogs", request, CancellationToken.None);
 
         // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-        (await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken))
+        response.Should().Be400BadRequest();
+        (await response.Content.ReadAsStringAsync(CancellationToken.None))
             .Should().Contain("name is required");
     }
 }

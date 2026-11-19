@@ -49,7 +49,7 @@ public sealed class CatalogsDbContextTests(DatabaseFixture database) : IAsyncDis
             WHERE ic.object_id = OBJECT_ID(N'dbo.CatalogProducts')
               AND ic.key_ordinal = 1
               AND COL_NAME(ic.object_id, ic.column_id) = N'ProductId'
-            """).SingleAsync(TestContext.Current.CancellationToken);
+            """).SingleAsync(CancellationToken.None);
 
         // Assert
         indexes.Should().BePositive();
@@ -67,10 +67,10 @@ public sealed class CatalogsDbContextTests(DatabaseFixture database) : IAsyncDis
 
         // Act
         context.Catalogs.Add(catalog);
-        await context.SaveChangesAsync(TestContext.Current.CancellationToken);
+        await context.SaveChangesAsync(CancellationToken.None);
 
         // Assert
-        (await context.Catalogs.AsNoTracking().FirstAsync(c => c.Id == catalog.Id, TestContext.Current.CancellationToken))
+        (await context.Catalogs.AsNoTracking().FirstAsync(c => c.Id == catalog.Id, CancellationToken.None))
             .Description.Should().HaveLength(500);
     }
 }

@@ -1,4 +1,3 @@
-using System.Net;
 using GeekShop.Api.IntegrationTests.Fixtures;
 using GeekShop.Api.Products.GetProduct;
 using GeekShop.Api.Products.UpdateProduct;
@@ -23,12 +22,12 @@ public sealed class UpdateProductEndpointTests(DatabaseFixture database) : IAsyn
         var update = new UpdateProductRequest { Name = $"Updated-{id}", Quantity = 1, Price = 2 };
 
         // Act
-        var response = await client.PutAsJsonAsync($"/products/{id}", update, TestContext.Current.CancellationToken);
+        var response = await client.PutAsJsonAsync($"/products/{id}", update, CancellationToken.None);
 
         // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.NoContent);
+        response.Should().Be204NoContent();
         var stored = await client.GetFromJsonAsync<GetProductResponse>(
-            $"/products/{id}", TestContext.Current.CancellationToken);
+            $"/products/{id}", CancellationToken.None);
         stored.Should().BeEquivalentTo(new GetProductResponse(id, update.Name, 1, 2, []));
     }
 
@@ -41,9 +40,9 @@ public sealed class UpdateProductEndpointTests(DatabaseFixture database) : IAsyn
 
         // Act
         var response = await client.PutAsJsonAsync(
-            $"/products/{Guid.NewGuid()}", update, TestContext.Current.CancellationToken);
+            $"/products/{Guid.NewGuid()}", update, CancellationToken.None);
 
         // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+        response.Should().Be404NotFound();
     }
 }

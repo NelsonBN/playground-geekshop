@@ -11,18 +11,18 @@ public sealed class UpdateCatalogUseCaseTests
         // Arrange
         var catalog = Catalog.Create("Old", "Old description");
         var repository = Substitute.For<ICatalogsRepository>();
-        repository.GetAsync(catalog.Id, TestContext.Current.CancellationToken).Returns(catalog);
+        repository.GetAsync(catalog.Id, CancellationToken.None).Returns(catalog);
         var useCase = new UpdateCatalogUseCase(repository);
         var request = new UpdateCatalogRequest { Name = "New", Description = "New description" };
 
         // Act
-        var result = await useCase.HandleAsync(catalog.Id, request, TestContext.Current.CancellationToken);
+        var result = await useCase.HandleAsync(catalog.Id, request, CancellationToken.None);
 
         // Assert
         result.Should().BeTrue();
         await repository.Received(1).UpdateAsync(
             Arg.Is<Catalog>(c => c.Id == catalog.Id && c.Name == "New" && c.Description == "New description"),
-            TestContext.Current.CancellationToken);
+            CancellationToken.None);
     }
 
     [Fact]
@@ -35,7 +35,7 @@ public sealed class UpdateCatalogUseCaseTests
 
         // Act
         var result = await useCase.HandleAsync(
-            Guid.NewGuid(), new UpdateCatalogRequest { Name = "New" }, TestContext.Current.CancellationToken);
+            Guid.NewGuid(), new UpdateCatalogRequest { Name = "New" }, CancellationToken.None);
 
         // Assert
         result.Should().BeFalse();

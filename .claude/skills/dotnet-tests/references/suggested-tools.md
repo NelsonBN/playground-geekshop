@@ -8,6 +8,8 @@ Tools marked (base) are the skill's fixed stack and need no approval. Every othe
 
 ## Tools to use
 
+Every package is referenced with an **exact version** (e.g. `9.6.0`); wildcards and floating versions are forbidden. After `dotnet add package`, check the csproj, and replace any `*`/`2.*`.
+
 | Tool | Use for | Usage | When |
 |------|---------|-------|------|
 | `xunit` 2.x (base) | Test framework | Always | Every test project |
@@ -20,7 +22,7 @@ Tools marked (base) are the skill's fixed stack and need no approval. Every othe
 | `NSubstitute` (base) | Dummy, stub, spy, mock, fake | Specific cases | The unit depends on a boundary (I/O, clock, external service) |
 | `Testcontainers` + module (base) | Real dependencies in disposable containers | Specific cases | Integration tests that need a real database, cache or broker |
 | `Microsoft.AspNetCore.Mvc.Testing` (base) | `WebApplicationFactory` in-process API host | Specific cases | Integration tests of web/API projects |
-| `Assertions.Web` (base) | Assertions on `HttpResponseMessage` | Specific cases | HTTP integration tests |
+| `AwesomeAssertions.Web` (base) | Assertions on `HttpResponseMessage` | Specific cases | HTTP integration tests |
 | `ReportGenerator` (base) | Merged summary and HTML coverage report | Specific cases | A human-readable or CI report is wanted (the gate works without it) |
 | `Microsoft.Extensions.TimeProvider.Testing` (`FakeTimeProvider`) | Deterministic time | Specific cases | Code uses clocks, delays or expiry |
 | `Bogus` | Realistic generated test data | Specific cases | Builders become long, or varied data helps |
@@ -35,5 +37,5 @@ Do not add these packages, do not write code against them, and replace them when
 | Tool | Never because | Use instead |
 |------|---------------|-------------|
 | `FluentAssertions` | The skill standardizes on its maintained fork; two assertion libraries in one codebase is noise | `AwesomeAssertions` |
-| `FluentAssertions.Web` | Built on `FluentAssertions` | `Assertions.Web` |
+| `FluentAssertions.Web` | Built on `FluentAssertions` | `AwesomeAssertions.Web` |
 | `Moq` | The skill standardizes on one mocking library | `NSubstitute` |

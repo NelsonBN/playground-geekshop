@@ -10,7 +10,7 @@ public static class ProductsApi
 
     public static async Task<Guid> CreateAsync(HttpClient client, AddProductRequest request)
     {
-        var response = await client.PostAsJsonAsync("/products", request, TestContext.Current.CancellationToken);
-        return await response.Content.ReadFromJsonAsync<Guid>(TestContext.Current.CancellationToken);
+        var response = await client.PostAsJsonAsync("/products", request, CancellationToken.None);
+        return await response.Content.ReadFromJsonAsync<Guid>(CancellationToken.None);
     }
 }

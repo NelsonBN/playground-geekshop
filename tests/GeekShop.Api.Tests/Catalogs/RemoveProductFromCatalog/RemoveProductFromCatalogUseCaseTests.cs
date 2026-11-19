@@ -15,16 +15,16 @@ public sealed class RemoveProductFromCatalogUseCaseTests
         // Arrange
         var catalogId = Guid.NewGuid();
         var productId = Guid.NewGuid();
-        _catalogs.ExistsAsync(catalogId, TestContext.Current.CancellationToken).Returns(true);
-        _products.ExistsAsync(productId, TestContext.Current.CancellationToken).Returns(true);
+        _catalogs.ExistsAsync(catalogId, CancellationToken.None).Returns(true);
+        _products.ExistsAsync(productId, CancellationToken.None).Returns(true);
         var useCase = new RemoveProductFromCatalogUseCase(_catalogs, _products);
 
         // Act
-        var result = await useCase.HandleAsync(catalogId, productId, TestContext.Current.CancellationToken);
+        var result = await useCase.HandleAsync(catalogId, productId, CancellationToken.None);
 
         // Assert
         result.Should().BeTrue();
-        await _catalogs.Received(1).RemoveProductAsync(catalogId, productId, TestContext.Current.CancellationToken);
+        await _catalogs.Received(1).RemoveProductAsync(catalogId, productId, CancellationToken.None);
     }
 
     [Fact]
@@ -36,7 +36,7 @@ public sealed class RemoveProductFromCatalogUseCaseTests
         var useCase = new RemoveProductFromCatalogUseCase(_catalogs, _products);
 
         // Act
-        var result = await useCase.HandleAsync(Guid.NewGuid(), Guid.NewGuid(), TestContext.Current.CancellationToken);
+        var result = await useCase.HandleAsync(Guid.NewGuid(), Guid.NewGuid(), CancellationToken.None);
 
         // Assert
         result.Should().BeFalse();
@@ -53,7 +53,7 @@ public sealed class RemoveProductFromCatalogUseCaseTests
         var useCase = new RemoveProductFromCatalogUseCase(_catalogs, _products);
 
         // Act
-        var result = await useCase.HandleAsync(Guid.NewGuid(), Guid.NewGuid(), TestContext.Current.CancellationToken);
+        var result = await useCase.HandleAsync(Guid.NewGuid(), Guid.NewGuid(), CancellationToken.None);
 
         // Assert
         result.Should().BeFalse();

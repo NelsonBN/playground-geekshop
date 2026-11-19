@@ -1,4 +1,3 @@
-using System.Net;
 using GeekShop.Api.Catalogs.GetCatalog;
 using GeekShop.Api.IntegrationTests.Fixtures;
 
@@ -25,12 +24,12 @@ public sealed class GetCatalogEndpointTests(DatabaseFixture database) : IAsyncDi
         await CatalogsApi.AddProductAsync(client, id, productId);
 
         // Act
-        var response = await client.GetAsync($"/catalogs/{id}", TestContext.Current.CancellationToken);
+        var response = await client.GetAsync($"/catalogs/{id}", CancellationToken.None);
 
         // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        response.Should().Be200Ok();
         var body = await response.Content.ReadFromJsonAsync<GetCatalogResponse>(
-            TestContext.Current.CancellationToken);
+            CancellationToken.None);
         body.Should().BeEquivalentTo(new GetCatalogResponse(
             id, catalogRequest.Name, catalogRequest.Description,
             [new CatalogProductResponse(productId, productRequest.Name)]));
@@ -43,9 +42,9 @@ public sealed class GetCatalogEndpointTests(DatabaseFixture database) : IAsyncDi
         var client = _factory.CreateClient();
 
         // Act
-        var response = await client.GetAsync($"/catalogs/{Guid.NewGuid()}", TestContext.Current.CancellationToken);
+        var response = await client.GetAsync($"/catalogs/{Guid.NewGuid()}", CancellationToken.None);
 
         // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+        response.Should().Be404NotFound();
     }
 }

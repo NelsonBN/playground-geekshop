@@ -14,12 +14,12 @@ public sealed class AddCatalogUseCaseTests
         var request = new AddCatalogRequest { Name = "Summer", Description = "Summer deals" };
 
         // Act
-        var id = await useCase.HandleAsync(request, TestContext.Current.CancellationToken);
+        var id = await useCase.HandleAsync(request, CancellationToken.None);
 
         // Assert
         id.Should().NotBeEmpty();
         await repository.Received(1).AddAsync(
             Arg.Is<Catalog>(c => c.Id == id && c.Name == "Summer" && c.Description == "Summer deals"),
-            TestContext.Current.CancellationToken);
+            CancellationToken.None);
     }
 }

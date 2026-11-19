@@ -13,13 +13,13 @@ public sealed class GetProductUseCaseTests
         var product = new Product { Id = Guid.NewGuid(), Name = "Keyboard", Quantity = 5, Price = 19.9 };
         var catalog = Catalog.Create("Peripherals", null);
         var repository = Substitute.For<IProductsRepository>();
-        repository.GetAsync(product.Id, TestContext.Current.CancellationToken).Returns(product);
+        repository.GetAsync(product.Id, CancellationToken.None).Returns(product);
         var catalogs = Substitute.For<ICatalogsRepository>();
-        catalogs.ListByProductAsync(product.Id, TestContext.Current.CancellationToken).Returns([catalog]);
+        catalogs.ListByProductAsync(product.Id, CancellationToken.None).Returns([catalog]);
         var useCase = new GetProductUseCase(repository, catalogs);
 
         // Act
-        var result = await useCase.HandleAsync(product.Id, TestContext.Current.CancellationToken);
+        var result = await useCase.HandleAsync(product.Id, CancellationToken.None);
 
         // Assert
         result.Should().BeEquivalentTo(new GetProductResponse(
@@ -32,13 +32,13 @@ public sealed class GetProductUseCaseTests
         // Arrange
         var product = new Product { Id = Guid.NewGuid(), Name = "Keyboard", Quantity = 5, Price = 19.9 };
         var repository = Substitute.For<IProductsRepository>();
-        repository.GetAsync(product.Id, TestContext.Current.CancellationToken).Returns(product);
+        repository.GetAsync(product.Id, CancellationToken.None).Returns(product);
         var catalogs = Substitute.For<ICatalogsRepository>();
-        catalogs.ListByProductAsync(product.Id, TestContext.Current.CancellationToken).Returns([]);
+        catalogs.ListByProductAsync(product.Id, CancellationToken.None).Returns([]);
         var useCase = new GetProductUseCase(repository, catalogs);
 
         // Act
-        var result = await useCase.HandleAsync(product.Id, TestContext.Current.CancellationToken);
+        var result = await useCase.HandleAsync(product.Id, CancellationToken.None);
 
         // Assert
         result!.Catalogs.Should().BeEmpty();
@@ -54,7 +54,7 @@ public sealed class GetProductUseCaseTests
         var useCase = new GetProductUseCase(repository, catalogs);
 
         // Act
-        var result = await useCase.HandleAsync(Guid.NewGuid(), TestContext.Current.CancellationToken);
+        var result = await useCase.HandleAsync(Guid.NewGuid(), CancellationToken.None);
 
         // Assert
         result.Should().BeNull();

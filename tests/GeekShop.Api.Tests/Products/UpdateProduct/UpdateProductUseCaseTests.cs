@@ -11,17 +11,17 @@ public sealed class UpdateProductUseCaseTests
         // Arrange
         var product = new Product { Id = Guid.NewGuid(), Name = "Old", Quantity = 1, Price = 1 };
         var repository = Substitute.For<IProductsRepository>();
-        repository.GetAsync(product.Id, TestContext.Current.CancellationToken).Returns(product);
+        repository.GetAsync(product.Id, CancellationToken.None).Returns(product);
         var useCase = new UpdateProductUseCase(repository);
         var request = new UpdateProductRequest { Name = "New", Quantity = 7, Price = 3.5 };
 
         // Act
-        var result = await useCase.HandleAsync(product.Id, request, TestContext.Current.CancellationToken);
+        var result = await useCase.HandleAsync(product.Id, request, CancellationToken.None);
 
         // Assert
         result.Should().BeTrue();
         product.Should().BeEquivalentTo(new { product.Id, Name = "New", Quantity = 7u, Price = 3.5 });
-        await repository.Received(1).UpdateAsync(product, TestContext.Current.CancellationToken);
+        await repository.Received(1).UpdateAsync(product, CancellationToken.None);
     }
 
     [Fact]
@@ -34,7 +34,7 @@ public sealed class UpdateProductUseCaseTests
         var request = new UpdateProductRequest { Name = "New", Quantity = 7, Price = 3.5 };
 
         // Act
-        var result = await useCase.HandleAsync(Guid.NewGuid(), request, TestContext.Current.CancellationToken);
+        var result = await useCase.HandleAsync(Guid.NewGuid(), request, CancellationToken.None);
 
         // Assert
         result.Should().BeFalse();

@@ -24,15 +24,15 @@ public sealed class RemoveProductFromCatalogEndpointTests(DatabaseFixture databa
 
         // Act
         var response = await client.DeleteAsync(
-            $"/catalogs/{id}/products/{productId}", TestContext.Current.CancellationToken);
+            $"/catalogs/{id}/products/{productId}", CancellationToken.None);
 
         // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.NoContent);
+        response.Should().Be204NoContent();
         var catalog = await client.GetFromJsonAsync<GetCatalogResponse>(
-            $"/catalogs/{id}", TestContext.Current.CancellationToken);
+            $"/catalogs/{id}", CancellationToken.None);
         catalog!.Products.Should().BeEmpty();
-        (await client.GetAsync($"/products/{productId}", TestContext.Current.CancellationToken))
-            .StatusCode.Should().Be(HttpStatusCode.OK);
+        (await client.GetAsync($"/products/{productId}", CancellationToken.None))
+            .Should().Be200Ok();
     }
 
     [Fact]
@@ -45,10 +45,10 @@ public sealed class RemoveProductFromCatalogEndpointTests(DatabaseFixture databa
 
         // Act
         var response = await client.DeleteAsync(
-            $"/catalogs/{id}/products/{productId}", TestContext.Current.CancellationToken);
+            $"/catalogs/{id}/products/{productId}", CancellationToken.None);
 
         // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.NoContent);
+        response.Should().Be204NoContent();
     }
 
     [Fact]
@@ -62,12 +62,12 @@ public sealed class RemoveProductFromCatalogEndpointTests(DatabaseFixture databa
 
         // Act
         var responses = await Task.WhenAll(Enumerable.Range(0, 20).Select(_ => client.DeleteAsync(
-            $"/catalogs/{id}/products/{productId}", TestContext.Current.CancellationToken)));
+            $"/catalogs/{id}/products/{productId}", CancellationToken.None)));
 
         // Assert
         responses.Select(r => r.StatusCode).Should().AllBeEquivalentTo(HttpStatusCode.NoContent);
         var catalog = await client.GetFromJsonAsync<GetCatalogResponse>(
-            $"/catalogs/{id}", TestContext.Current.CancellationToken);
+            $"/catalogs/{id}", CancellationToken.None);
         catalog!.Products.Should().BeEmpty();
     }
 
@@ -80,9 +80,9 @@ public sealed class RemoveProductFromCatalogEndpointTests(DatabaseFixture databa
 
         // Act
         var response = await client.DeleteAsync(
-            $"/catalogs/{id}/products/{Guid.NewGuid()}", TestContext.Current.CancellationToken);
+            $"/catalogs/{id}/products/{Guid.NewGuid()}", CancellationToken.None);
 
         // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+        response.Should().Be404NotFound();
     }
 }

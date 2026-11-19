@@ -12,11 +12,11 @@ public sealed class GetCatalogsUseCaseTests
         var first = Catalog.Create("Summer", "Deals");
         var second = Catalog.Create("Winter", null);
         var repository = Substitute.For<ICatalogsRepository>();
-        repository.ListAsync(TestContext.Current.CancellationToken).Returns([first, second]);
+        repository.ListAsync(CancellationToken.None).Returns([first, second]);
         var useCase = new GetCatalogsUseCase(repository);
 
         // Act
-        var result = await useCase.HandleAsync(TestContext.Current.CancellationToken);
+        var result = await useCase.HandleAsync(CancellationToken.None);
 
         // Assert
         result.Should().Equal(

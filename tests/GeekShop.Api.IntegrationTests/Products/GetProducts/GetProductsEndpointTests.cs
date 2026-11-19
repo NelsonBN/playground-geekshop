@@ -1,4 +1,3 @@
-using System.Net;
 using GeekShop.Api.IntegrationTests.Fixtures;
 using GeekShop.Api.Products.GetProducts;
 
@@ -22,12 +21,12 @@ public sealed class GetProductsEndpointTests(DatabaseFixture database) : IAsyncD
         var id = await ProductsApi.CreateAsync(client, request);
 
         // Act
-        var response = await client.GetAsync("/products", TestContext.Current.CancellationToken);
+        var response = await client.GetAsync("/products", CancellationToken.None);
 
         // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        response.Should().Be200Ok();
         var body = await response.Content.ReadFromJsonAsync<List<GetProductsResponse>>(
-            TestContext.Current.CancellationToken);
+            CancellationToken.None);
         body.Should().Contain(new GetProductsResponse(id, request.Name));
     }
 }

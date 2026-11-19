@@ -11,15 +11,15 @@ public sealed class DeleteCatalogUseCaseTests
         // Arrange
         var id = Guid.NewGuid();
         var repository = Substitute.For<ICatalogsRepository>();
-        repository.ExistsAsync(id, TestContext.Current.CancellationToken).Returns(true);
+        repository.ExistsAsync(id, CancellationToken.None).Returns(true);
         var useCase = new DeleteCatalogUseCase(repository);
 
         // Act
-        var result = await useCase.HandleAsync(id, TestContext.Current.CancellationToken);
+        var result = await useCase.HandleAsync(id, CancellationToken.None);
 
         // Assert
         result.Should().BeTrue();
-        await repository.Received(1).DeleteAsync(id, TestContext.Current.CancellationToken);
+        await repository.Received(1).DeleteAsync(id, CancellationToken.None);
     }
 
     [Fact]
@@ -31,7 +31,7 @@ public sealed class DeleteCatalogUseCaseTests
         var useCase = new DeleteCatalogUseCase(repository);
 
         // Act
-        var result = await useCase.HandleAsync(Guid.NewGuid(), TestContext.Current.CancellationToken);
+        var result = await useCase.HandleAsync(Guid.NewGuid(), CancellationToken.None);
 
         // Assert
         result.Should().BeFalse();

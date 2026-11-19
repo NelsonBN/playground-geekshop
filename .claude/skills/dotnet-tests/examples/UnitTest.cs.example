@@ -23,7 +23,7 @@ public sealed class PaymentServiceTests
         _gateway.ChargeAsync("card-1", 25m, Arg.Any<CancellationToken>()).Returns(new ChargeResult(true, "tx-9"));
 
         // Act
-        var receipt = await _sut.PayAsync("card-1", 25m, TestContext.Current.CancellationToken);
+        var receipt = await _sut.PayAsync("card-1", 25m, CancellationToken.None);
 
         // Assert
         receipt.TransactionId.Should().Be("tx-9");
@@ -37,7 +37,7 @@ public sealed class PaymentServiceTests
         _gateway.ChargeAsync("card-1", 25m, Arg.Any<CancellationToken>()).Returns(new ChargeResult(false, null));
 
         // Act
-        var act = () => _sut.PayAsync("card-1", 25m, TestContext.Current.CancellationToken);
+        var act = () => _sut.PayAsync("card-1", 25m, CancellationToken.None);
 
         // Assert
         await act.Should().ThrowAsync<PaymentDeclinedException>();
@@ -50,7 +50,7 @@ public sealed class PaymentServiceTests
     public async Task Given_NonPositiveAmount_When_Pay_Then_ThrowsArgumentOutOfRange(decimal amount)
     {
         // Act
-        var act = () => _sut.PayAsync("card-1", amount, TestContext.Current.CancellationToken);
+        var act = () => _sut.PayAsync("card-1", amount, CancellationToken.None);
 
         // Assert
         (await act.Should().ThrowAsync<ArgumentOutOfRangeException>()).WithParameterName("amount");
@@ -63,7 +63,7 @@ public sealed class PaymentServiceTests
         _gateway.ChargeAsync("card-1", 25m, Arg.Any<CancellationToken>()).Returns(new ChargeResult(true, "tx-9"));
 
         // Act
-        await _sut.PayAsync("card-1", 25m, TestContext.Current.CancellationToken);
+        await _sut.PayAsync("card-1", 25m, CancellationToken.None);
 
         // Assert: the audit entry is part of the contract, so the interaction is verified with the exact argument
         _audit.Received(1).Record(Arg.Is<string>(entry => entry.Contains("tx-9")));

@@ -63,8 +63,8 @@ Never commit `.env` or put a password in a tracked file.
 
 ### Test
 
-Test projects live under `tests/` and `global.json` selects the Microsoft
-Testing Platform runner. Follow the
+Test projects live under `tests/` and use `dotnet test`.
+Follow the
 [`dotnet-tests` skill](.claude/skills/dotnet-tests/SKILL.md) for the required
 project layout, test-first workflow and quality gates.
 

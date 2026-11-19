@@ -15,9 +15,10 @@ public sealed class OrdersApiFactory : WebApplicationFactory<Program>, IAsyncLif
         .WithImage("postgres:16.4") // pinned tag, never latest
         .Build();
 
-    public async ValueTask InitializeAsync() => await _database.StartAsync();
+    public async Task InitializeAsync() => await _database.StartAsync();
 
-    public override async ValueTask DisposeAsync()
+    // WebApplicationFactory already has `ValueTask DisposeAsync()`, so the xunit one is implemented explicitly
+    async Task IAsyncLifetime.DisposeAsync()
     {
         await _database.DisposeAsync();
         await base.DisposeAsync();
@@ -45,12 +46,12 @@ public sealed class OrdersEndpointTests(OrdersApiFactory factory) : IClassFixtur
         var request = new CreateOrder(CustomerId: Guid.NewGuid(), Sku: "SKU-1", Quantity: 2);
 
         // Act
-        var response = await _client.PostAsJsonAsync("/orders", request, TestContext.Current.CancellationToken);
+        var response = await _client.PostAsJsonAsync("/orders", request, CancellationToken.None);
 
         // Assert
         response.Should().Be201Created().And.HaveHeader("Location");
-        var created = await response.Content.ReadFromJsonAsync<OrderDto>(TestContext.Current.CancellationToken);
-        var stored = await _client.GetAsync($"/orders/{created!.Id}", TestContext.Current.CancellationToken);
+        var created = await response.Content.ReadFromJsonAsync<OrderDto>(CancellationToken.None);
+        var stored = await _client.GetAsync($"/orders/{created!.Id}", CancellationToken.None);
         stored.Should().Be200Ok().And.BeAs(new { created.Id, Quantity = 2 });
     }
 
@@ -61,7 +62,7 @@ public sealed class OrdersEndpointTests(OrdersApiFactory factory) : IClassFixtur
         var request = new CreateOrder(Guid.NewGuid(), "SKU-1", 0);
 
         // Act
-        var response = await _client.PostAsJsonAsync("/orders", request, TestContext.Current.CancellationToken);
+        var response = await _client.PostAsJsonAsync("/orders", request, CancellationToken.None);
 
         // Assert
         response.Should().Be400BadRequest();

@@ -9,7 +9,7 @@ issue -> test (unit or integration) -> RED -> fix -> GREEN -> (refactor) -> gate
 | Step | Do | Accepted only if |
 |------|----|------------------|
 | Test | Reproduce the issue in the mirror test file, named after the symptom | |
-| **Red** | `dotnet test --project <P>.Tests.csproj --filter-display-name "*<test>*"` (integration: `<P>.IntegrationTests.csproj`) | It fails on an assertion that states the reported symptom |
+| **Red** | `dotnet test <P>.Tests.csproj --filter "DisplayName~<test>"` (integration: `<P>.IntegrationTests.csproj`) | It fails on an assertion that states the reported symptom |
 | Fix | Smallest production change; do not touch the test | |
 | **Green** | Same command | It passes, and production code (not the test) changed since the red |
 | Refactor | Optional, while green (`<tests> unit`) | Still green |
@@ -51,7 +51,7 @@ Ticket: "A price of exactly 100 gets no discount."
        result.Should().Be(90m);
    }
    ```
-2. Red: `dotnet test --project tests/Lib.Tests/Lib.Tests.csproj --filter-display-name "*Given_PriceOf100*"` fails with `Expected result to be 90M, but found 100M`. Quote that line in the reply.
+2. Red: `dotnet test tests/Lib.Tests/Lib.Tests.csproj --filter "DisplayName~Given_PriceOf100"` fails with `Expected result to be 90M, but found 100M`. Quote that line in the reply.
 3. Fix `price > 100` to `price >= 100`.
 4. Green: run the same command; it passes. Say so in the reply.
 5. `all` and `quality`: the boundary is covered and the mutant `>=` to `>` is killed.

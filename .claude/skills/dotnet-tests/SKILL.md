@@ -15,7 +15,7 @@ Every feature or fix ships with tests that prove it works and keep it working. D
 > For **every** issue, whatever its source (ticket, review comment, prompt instruction, debug session, failing build) and for new behaviour:
 >
 > 1. **Write the test first** (unit, or integration when the bug needs real infrastructure) that reproduces the problem.
-> 2. **Red:** run only that test (`dotnet test --project <P>.Tests.csproj --filter-display-name "*<test>*"`) and watch it fail on an assertion that states the symptom. A test that passes, does not compile, or matches nothing is not a red. Quote the failure message in your reply.
+> 2. **Red:** run only that test (`dotnet test <P>.Tests.csproj --filter "DisplayName~<test>"`) and watch it fail on an assertion that states the symptom. A test that passes, does not compile, or matches nothing is not a red. Quote the failure message in your reply.
 > 3. **Fix** with the smallest production change. Never edit the test to make it pass.
 > 4. **Green:** run the same test again, watch it pass, say so.
 > 5. **Refactor** only while green, then run the gates.

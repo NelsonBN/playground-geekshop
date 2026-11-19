@@ -1,4 +1,4 @@
-<!-- Example only: copy to <Project>.Tests/<Project>.Tests.csproj and pin versions to the latest stable
+<!-- Example only: copy to <Project>.Tests/<Project>.Tests.csproj. Keep `xunit` on 2.x and pin the other versions to the latest stable
      (check with `dotnet package search <id>`). With central package management, move Version to Directory.Packages.props. -->
 <Project Sdk="Microsoft.NET.Sdk">
 
@@ -7,16 +7,14 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <IsPackable>false</IsPackable>
-    <OutputType>Exe</OutputType>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="*" />
-    <PackageReference Include="xunit.v3" Version="*" />
-    <!-- Microsoft Testing Platform extensions: required for `--coverage` and `--report-trx` (coverage gate and CI) -->
-    <PackageReference Include="Microsoft.Testing.Extensions.CodeCoverage" Version="*" />
-    <PackageReference Include="Microsoft.Testing.Extensions.TrxReport" Version="*" />
+    <PackageReference Include="xunit" Version="2.*.*" />
     <PackageReference Include="xunit.runner.visualstudio" Version="*" PrivateAssets="all" />
+    <!-- Coverage collector: required for `--collect "XPlat Code Coverage"` (coverage gate and CI) -->
+    <PackageReference Include="coverlet.collector" Version="*" PrivateAssets="all" />
     <PackageReference Include="AwesomeAssertions" Version="*" />
     <PackageReference Include="NSubstitute" Version="*" />
   </ItemGroup>

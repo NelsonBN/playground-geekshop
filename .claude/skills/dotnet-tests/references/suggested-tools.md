@@ -10,10 +10,11 @@ Tools marked (base) are the skill's fixed stack and need no approval. Every othe
 
 | Tool | Use for | Usage | When |
 |------|---------|-------|------|
-| `xunit.v3` (base) | Test framework | Always | Every test project |
+| `xunit` 2.x (base) | Test framework | Always | Every test project |
 | `xunit.runner.visualstudio` (base) | Runner for `dotnet test` and IDEs | Always | Every test project |
+| `coverlet.collector` (base) | Cobertura coverage for the coverage gate (`--collect "XPlat Code Coverage"`) | Always | Every test project |
 | `Microsoft.NET.Test.Sdk` (base) | Test host | Always | Every test project |
-| `xunit.analyzers` (base, included with xunit.v3) | Test-quality analyzer rules | Always | Every test project |
+| `xunit.analyzers` (base, included with xunit) | Test-quality analyzer rules | Always | Every test project |
 | `AwesomeAssertions` (base) | All assertions (`.Should()`) | Always | Every test |
 | `Stryker.NET` (`dotnet-stryker`, base) | Mutation testing, as a local tool pinned in `.config/dotnet-tools.json` | Always | Mutation step on changed files |
 | `NSubstitute` (base) | Dummy, stub, spy, mock, fake | Specific cases | The unit depends on a boundary (I/O, clock, external service) |

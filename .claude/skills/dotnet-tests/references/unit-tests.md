@@ -1,6 +1,6 @@
 # Unit tests
 
-Fast (milliseconds), in-process, no network, disk, database or clock. A unit test checks one unit's observable behaviour: a return value, a state change, or an interaction at a boundary. Packages: [suggested-tools.md](suggested-tools.md). Pass the project with `--project`, filter with `--filter-display-name` or `--filter-trait`. Project file: [../examples/TestProject.csproj.example](../examples/TestProject.csproj.example).
+Fast (milliseconds), in-process, no network, disk, database or clock. A unit test checks one unit's observable behaviour: a return value, a state change, or an interaction at a boundary. Packages: [suggested-tools.md](suggested-tools.md). Pass the project as the first argument of `dotnet test`, filter with `--filter "DisplayName~<text>"` or `--filter "Category=Integration"`. Project file: [../examples/TestProject.csproj.example](../examples/TestProject.csproj.example).
 
 ## Pattern and assertions
 
@@ -38,7 +38,7 @@ var sut = new CreateOrderUseCase(new OrderRepository(new AppDbContext(options)))
 // GOOD: substitute the interface, assert the behaviour
 var repository = Substitute.For<IOrderRepository>();
 var sut = new CreateOrderUseCase(repository);
-var id = await sut.ExecuteAsync(request, TestContext.Current.CancellationToken);
+var id = await sut.ExecuteAsync(request, CancellationToken.None);
 repository.Received(1).Add(Arg.Is<Order>(o => o.Sku == request.Sku));
 ```
 

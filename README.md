@@ -67,7 +67,7 @@ The API is served at `http://localhost:8080` (see `tests/Demo.http` for requests
 It starts only after SQL Server is healthy and the schema was created. Stop it with:
 
 ```powershell
-docker compose down              # add -v to also delete the database volume
+docker compose down              # add -v to also delete the database and broker volumes
 ```
 
 ### Only the dependencies (run the API from your IDE or `dotnet run`)

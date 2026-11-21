@@ -44,6 +44,7 @@ services:
   rabbitmq:
     image: rabbitmq:4.4.0-management
     container_name: geekshop-rabbitmq
+    hostname: geekshop-rabbitmq # RabbitMQ keys its data directory by hostname
     restart: always
     environment:
       RABBITMQ_DEFAULT_USER: guest
@@ -51,6 +52,8 @@ services:
     ports:
       - 5672:5672   # messaging (AMQP)
       - 15672:15672 # management UI
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
     networks:
       - geekshop
     healthcheck:
@@ -62,3 +65,4 @@ services:
 
 volumes:
   sqlserver-data:
+  rabbitmq-data:

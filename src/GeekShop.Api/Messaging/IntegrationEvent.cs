@@ -9,8 +9,8 @@ namespace GeekShop.Api.Messaging;
 public abstract record IntegrationEvent(
     [property: JsonIgnore] string Topic)
 {
-    public Guid EventId { get; } = Guid.NewGuid();
-    public DateTimeOffset OccurredAt { get; } = DateTimeOffset.UtcNow;
+    public Guid EventId { get; init; } = Guid.NewGuid();
+    public DateTimeOffset OccurredAt { get; init; } = DateTimeOffset.UtcNow;
 
     [JsonIgnore]
     public string Subject => GetType().Name;

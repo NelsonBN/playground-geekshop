@@ -67,7 +67,7 @@ public sealed class RabbitMqFixture : IAsyncLifetime
     {
         var name = $"vhost-{Guid.NewGuid():N}";
         await _runAsync("rabbitmqctl", "add_vhost", name);
-        await _runAsync("rabbitmqctl", "set_permissions", "-p", name, "guest", ".*", ".*", ".*");
+        await _runAsync("rabbitmqctl", "set_permissions", "-p", name, RabbitMqBuilder.DefaultUsername, ".*", ".*", ".*");
 
         return $"{ConnectionString.TrimEnd('/')}/{name}";
     }

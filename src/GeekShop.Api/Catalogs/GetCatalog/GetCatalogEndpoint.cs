@@ -4,11 +4,11 @@ internal static class GetCatalogEndpoint
 {
     public static void Map(RouteGroupBuilder group)
         => group.MapGet("/{id:guid}", async (
-            GetCatalogUseCase useCase,
+            GetCatalogHandler handler,
             Guid id,
             CancellationToken cancellationToken) =>
         {
-            var catalog = await useCase.HandleAsync(id, cancellationToken);
+            var catalog = await handler.HandleAsync(id, cancellationToken);
 
             if(catalog is null)
             {

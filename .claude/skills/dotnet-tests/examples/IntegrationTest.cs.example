@@ -1,65 +1,77 @@
-// Path: tests/Orders.IntegrationTests/Endpoints/OrdersEndpointTests.cs  (project Orders.IntegrationTests)
-// Example only (not compiled): a narrow integration test with a real PostgreSQL (Testcontainers)
-// behind the in-process API (WebApplicationFactory), asserted with AwesomeAssertions.Web.
+// Path: tests/Orders.IntegrationTests/Endpoints/CreateOrderEndpointTests.cs  (project Orders.IntegrationTests)
+// Example only (not compiled): a boundary-to-boundary flow, from the HTTP endpoint to the database, the broker and an external API.
+// The host is the production host. Only configuration changes (connection strings, URLs); no own service is replaced.
+// Every external service runs for real in a container through Testcontainers (selection order: references/integration-tests.md):
+// database and broker use their own modules, the third-party payments API a customized container (WireMock protocol emulator).
 // Xunit and AwesomeAssertions come from the implicit usings of the test csproj.
 using System.Net.Http.Json;
 using Microsoft.AspNetCore.Mvc.Testing;
-using Microsoft.Extensions.DependencyInjection;
+using Npgsql;
 using Testcontainers.PostgreSql;
+using Testcontainers.RabbitMq;
+using WireMock.Net.Testcontainers;
 
 namespace Orders.IntegrationTests;
 
 public sealed class OrdersApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
 {
-    private readonly PostgreSqlContainer _database = new PostgreSqlBuilder()
-        .WithImage("postgres:16.4") // pinned tag, never latest
-        .Build();
+    private readonly PostgreSqlContainer _database = new PostgreSqlBuilder().WithImage("postgres:16.4").Build(); // pinned tag, never latest
+    private readonly RabbitMqContainer _broker = new RabbitMqBuilder().WithImage("rabbitmq:3.13-management").Build();
+    private readonly WireMockContainer _payments = new WireMockContainerBuilder().WithImage("wiremock/wiremock:3.9.1").Build();
 
-    public async Task InitializeAsync() => await _database.StartAsync();
+    public string ConnectionString => _database.GetConnectionString();
+
+    public async Task InitializeAsync()
+    {
+        await Task.WhenAll(_database.StartAsync(), _broker.StartAsync(), _payments.StartAsync());
+        // The fixture prepares what the app expects (schema is applied by the app's own migration at startup)
+    }
 
     // WebApplicationFactory already has `ValueTask DisposeAsync()`, so the xunit one is implemented explicitly
     async Task IAsyncLifetime.DisposeAsync()
     {
         await _database.DisposeAsync();
+        await _broker.DisposeAsync();
+        await _payments.DisposeAsync();
         await base.DisposeAsync();
     }
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
-        builder.ConfigureTestServices(services =>
-        {
-            services.RemoveAll<DbContextOptions<OrdersDbContext>>();
-            services.AddDbContext<OrdersDbContext>(o => o.UseNpgsql(_database.GetConnectionString()));
-        });
+        // Configuration only: the production DbContext, repositories, handlers and publishers all run as in production
+        builder.UseSetting("ConnectionStrings:Orders", _database.GetConnectionString());
+        builder.UseSetting("Broker:ConnectionString", _broker.GetConnectionString());
+        builder.UseSetting("Payments:BaseUrl", _payments.GetPublicUrl());
     }
 }
 
 [Trait("Category", "Integration")]
-public sealed class OrdersEndpointTests(OrdersApiFactory factory) : IClassFixture<OrdersApiFactory>
+public sealed class CreateOrderEndpointTests(OrdersApiFactory factory) : IClassFixture<OrdersApiFactory>
 {
     private readonly HttpClient _client = factory.CreateClient();
 
     [Fact]
-    public async Task Given_ValidOrder_When_Post_Then_Returns201AndOrderIsPersisted()
+    public async Task Given_ValidOrder_When_Post_Then_Returns201AndOrderRowIsStored()
     {
         // Arrange
-        var request = new CreateOrder(CustomerId: Guid.NewGuid(), Sku: "SKU-1", Quantity: 2);
+        var request = new { CustomerId = Guid.NewGuid(), Sku = "SKU-1", Quantity = 2 };
 
         // Act
         var response = await _client.PostAsJsonAsync("/orders", request, CancellationToken.None);
 
-        // Assert
+        // Assert: the response and the last boundary (the database row), both observable end state
         response.Should().Be201Created().And.HaveHeader("Location");
-        var created = await response.Content.ReadFromJsonAsync<OrderDto>(CancellationToken.None);
-        var stored = await _client.GetAsync($"/orders/{created!.Id}", CancellationToken.None);
-        stored.Should().Be200Ok().And.BeAs(new { created.Id, Quantity = 2 });
+        await using var connection = new NpgsqlConnection(factory.ConnectionString);
+        await connection.OpenAsync(CancellationToken.None);
+        await using var command = new NpgsqlCommand("select quantity from orders where sku = 'SKU-1'", connection);
+        (await command.ExecuteScalarAsync(CancellationToken.None)).Should().Be(2);
     }
 
     [Fact]
-    public async Task Given_ZeroQuantity_When_Post_Then_Returns400ProblemDetails()
+    public async Task Given_ZeroQuantity_When_Post_Then_Returns400AndNothingIsStored()
     {
         // Arrange
-        var request = new CreateOrder(Guid.NewGuid(), "SKU-1", 0);
+        var request = new { CustomerId = Guid.NewGuid(), Sku = "SKU-2", Quantity = 0 };
 
         // Act
         var response = await _client.PostAsJsonAsync("/orders", request, CancellationToken.None);

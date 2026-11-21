@@ -1,3 +1,4 @@
+using GeekShop.Api.Messaging;
 using GeekShop.Api.Products;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
@@ -6,7 +7,7 @@ namespace GeekShop.Api.Setup;
 
 /// <summary>
 /// Three probes, each answering a different question:
-/// <c>startup</c> and <c>ready</c> check the real dependency (SQL Server), while <c>live</c> only proves the process
+/// <c>startup</c> and <c>ready</c> check the real dependencies (SQL Server and RabbitMQ), while <c>live</c> only proves the process
 /// answers, so a database outage never makes an orchestrator restart a healthy process.
 /// </summary>
 public static class HealthSetup
@@ -20,7 +21,8 @@ public static class HealthSetup
         services
             .AddHealthChecks()
             .AddCheck("self", () => HealthCheckResult.Healthy(), tags: [LIVE_TAG])
-            .AddDbContextCheck<ProductsDbContext>("sqlserver", tags: [STARTUP_TAG, READY_TAG]);
+            .AddDbContextCheck<ProductsDbContext>("sqlserver", tags: [STARTUP_TAG, READY_TAG])
+            .AddCheck<RabbitMqHealthCheck>("rabbitmq", tags: [STARTUP_TAG, READY_TAG]);
 
         return services;
     }

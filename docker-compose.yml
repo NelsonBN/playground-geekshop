@@ -17,6 +17,11 @@ services:
       sqlserver:
         condition: service_healthy
 
+  rabbitmq:
+    extends:
+      file: docker-compose.dependencies.yml
+      service: rabbitmq
+
   api:
     build:
       context: .
@@ -26,6 +31,7 @@ services:
     restart: unless-stopped
     environment:
       ConnectionStrings__GeekShop: Server=sqlserver;Database=GeekShop;User Id=sa;Password=${MSSQL_SA_PASSWORD:?Set MSSQL_SA_PASSWORD in .env (copy .env.example)};TrustServerCertificate=True
+      RabbitMq__ConnectionString: amqp://guest:guest@rabbitmq:5672
     ports:
       - 8080:8080
     networks:
@@ -33,6 +39,8 @@ services:
     depends_on:
       mssqltools:
         condition: service_completed_successfully
+      rabbitmq:
+        condition: service_healthy
 
 volumes:
   sqlserver-data:

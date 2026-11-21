@@ -26,7 +26,13 @@ issue -> test (unit or integration) -> RED -> fix -> GREEN -> (refactor) -> gate
 | Failing CI or test | The failing case as a stable test (fix the code, not the test, unless the test is wrong, and then say so) |
 | New feature | The first behaviour, then the next, one red-green cycle each |
 
-Prefer a unit test; use an integration test only when the bug lives in real infrastructure a unit test cannot reproduce ([integration-tests.md](integration-tests.md)).
+Prefer a unit test when the bug lives in an isolated module. When it only appears across boundaries (wiring, query, serialization, message handling, configuration), the red test is an integration flow ([integration-tests.md](integration-tests.md)).
+
+## Integration reds
+
+- Reproduce through the real entry point (request, published message, job run) with the smallest data that triggers the symptom; assert the observable outcome at the boundary, not an internal call.
+- Run only that test: `dotnet test <P>.IntegrationTests.csproj --filter "DisplayName~<test>"`. Container start-up is part of the cost; a timeout, a container failure or "no tests ran" is not a red, the assertion message must state the symptom.
+- Keep the fixture's containers running between the red and green runs when the tooling allows it, and never weaken the flow (replace a path, shorten a timeout) to get the red or green faster.
 
 ## A good red
 

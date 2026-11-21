@@ -34,6 +34,3 @@ public sealed class DatabaseFixture : IAsyncLifetime
     public async Task DisposeAsync()
         => await _container.DisposeAsync();
 }
-
-[CollectionDefinition(nameof(DatabaseCollection))]
-public sealed class DatabaseCollection : ICollectionFixture<DatabaseFixture>;

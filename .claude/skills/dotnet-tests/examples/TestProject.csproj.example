@@ -1,23 +1,25 @@
-<!-- Example only: copy to <Project>.Tests/<Project>.Tests.csproj. Versions below are placeholders: NEVER write a wildcard or floating version
+<!-- Example only: UNIT test project. Copy to <Project>.Tests/<Project>.Tests.csproj. For an integration project use IntegrationTestProject.csproj.example.
+     Every `<exact-version>` is a placeholder that makes the file invalid on purpose: NEVER write a wildcard or floating version
      (`*`, `2.*`, `2.*.*`, `[2,)`). Install each package with `dotnet add package <id>` (xunit: `--version 2.9.3`, keep it on 2.x) so the resolved exact
      version is written, and check it afterwards. With central package management, move Version to Directory.Packages.props. -->
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net11.0</TargetFramework>
+    <!-- Placeholder: use the TargetFramework of the source project (for example net8.0) -->
+    <TargetFramework><target-framework></TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <IsPackable>false</IsPackable>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="*" />
-    <PackageReference Include="xunit" Version="*" />
-    <PackageReference Include="xunit.runner.visualstudio" Version="*" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="<exact-version>" />
+    <PackageReference Include="xunit" Version="<exact-version>" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="<exact-version>" PrivateAssets="all" />
     <!-- Coverage collector: required for `--collect "XPlat Code Coverage"` (coverage gate and CI) -->
-    <PackageReference Include="coverlet.collector" Version="*" PrivateAssets="all" />
-    <PackageReference Include="AwesomeAssertions" Version="*" />
-    <PackageReference Include="NSubstitute" Version="*" />
+    <PackageReference Include="coverlet.collector" Version="<exact-version>" PrivateAssets="all" />
+    <PackageReference Include="AwesomeAssertions" Version="<exact-version>" />
+    <PackageReference Include="NSubstitute" Version="<exact-version>" />
   </ItemGroup>
 
   <!-- Global usings for the test libraries: keep one line per PackageReference above, remove the ones the project does not use -->
@@ -27,15 +29,8 @@
     <Using Include="NSubstitute" />
   </ItemGroup>
 
-  <!-- Integration tests only (separate project or the same one) -->
-  <ItemGroup Condition="'$(IncludeIntegration)' == 'true'">
-    <PackageReference Include="Testcontainers" Version="*" />
-    <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="*" />
-    <PackageReference Include="AwesomeAssertions.Web" Version="*" />
-  </ItemGroup>
-
   <ItemGroup>
-    <!-- tests/MyProject.Tests/MyProject.Tests.csproj (or tests/MyProject.IntegrationTests/...): reference only its own source project -->
+    <!-- tests/MyProject.Tests/MyProject.Tests.csproj: reference only its own source project -->
     <ProjectReference Include="..\..\src\MyProject\MyProject.csproj" />
   </ItemGroup>
 

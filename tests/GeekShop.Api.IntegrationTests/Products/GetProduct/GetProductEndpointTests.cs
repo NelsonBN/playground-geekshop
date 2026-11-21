@@ -3,11 +3,11 @@ using GeekShop.Api.Products.GetProduct;
 
 namespace GeekShop.Api.IntegrationTests.Products.GetProduct;
 
-[Collection(nameof(DatabaseCollection))]
+[Collection(nameof(IntegrationCollection))]
 [Trait("Category", "Integration")]
-public sealed class GetProductEndpointTests(DatabaseFixture database) : IAsyncDisposable
+public sealed class GetProductEndpointTests(DatabaseFixture database, RabbitMqFixture rabbitMq) : IAsyncDisposable
 {
-    private readonly ApiFactory _factory = new(database.ConnectionString);
+    private readonly ApiFactory _factory = new(database.ConnectionString, rabbitMq.ConnectionString);
 
     public async ValueTask DisposeAsync()
         => await _factory.DisposeAsync();

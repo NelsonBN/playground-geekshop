@@ -4,11 +4,11 @@ internal static class DeleteCatalogEndpoint
 {
     public static void Map(RouteGroupBuilder group)
         => group.MapDelete("/{id:guid}", async (
-            DeleteCatalogUseCase useCase,
+            DeleteCatalogHandler handler,
             Guid id,
             CancellationToken cancellationToken) =>
         {
-            var deleted = await useCase.HandleAsync(id, cancellationToken);
+            var deleted = await handler.HandleAsync(id, cancellationToken);
 
             if(!deleted)
             {

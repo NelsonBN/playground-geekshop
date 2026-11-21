@@ -4,11 +4,11 @@ internal static class AddCatalogEndpoint
 {
     public static void Map(RouteGroupBuilder group)
         => group.MapPost("/", async (
-            AddCatalogUseCase useCase,
+            AddCatalogHandler handler,
             AddCatalogRequest request,
             CancellationToken cancellationToken) =>
         {
-            var id = await useCase.HandleAsync(request, cancellationToken);
+            var id = await handler.HandleAsync(request, cancellationToken);
 
             return Results.CreatedAtRoute("GetCatalog", new { id }, id);
         });

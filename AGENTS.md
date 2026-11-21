@@ -11,6 +11,7 @@ The intended stack is:
 
 - **.NET 11**.
 - **SQL Server** and **EF Core** for persistence.
+- **RabbitMQ** for integration events (publish only for now).
 - **Docker** for external dependencies.
 
 ### Features
@@ -18,6 +19,7 @@ The intended stack is:
 - Product management.
 - Catalog management (catalogs group products; products can be added to and
   removed from catalogs).
+- Integration events published to RabbitMQ for every write operation.
 
 For the user-facing feature list, API routes, health checks and run
 instructions, read [`README.md`](README.md) when you need that context (for
@@ -44,10 +46,12 @@ The current `http` launch profile listens at `http://localhost:8080`. For
 example, send `GET http://localhost:8080/products` or use `./tests/Demo.http`.
 Products are stored in SQL Server through EF Core, so a database must be running
 and `ConnectionStrings__GeekShop` must point at it. The application never creates
-the schema: `tests/init-db.sql` does, and docker-compose runs it.
+the schema: `tests/init-db.sql` does, and docker-compose runs it. Events go to
+RabbitMQ (`RabbitMq__ConnectionString`, see `README.md`); compose runs the broker
+and the API declares missing exchanges at startup.
 
 Two compose files exist (see `README.md`): `docker-compose.yml` runs the whole
-stack (SQL Server, schema init, and the API built from the `Dockerfile`, served at
+stack (SQL Server, schema init, RabbitMQ, and the API built from the `Dockerfile`, served at
 `http://localhost:8080`), and `docker-compose.dependencies.yml` runs only the
 dependencies so the API can run from the IDE. The first reuses the second through
 `extends`; both share container names, so stop one before starting the other:
@@ -70,7 +74,7 @@ project layout, test-first workflow and quality gates.
 
 Test rules (details in the skill):
 
-- Unit tests cover behaviour (use cases, business rules) and substitute every
+- Unit tests cover behaviour (handlers, business rules) and substitute every
   interface (e.g. `IProductsRepository`) with NSubstitute.
 - Never write tests for data-only types (DTOs, request/response records,
   entities): they have no business value.
@@ -121,7 +125,7 @@ tests/
 - Follow **domain-driven design** modeling: entities and value objects own and
   enforce their rules (validation, invariants, state changes) and expose
   behavior through factory and domain methods with private setters, instead of
-  anemic data bags. Use cases orchestrate; they do not hold the entity's rules.
+  anemic data bags. Handlers orchestrate; they do not hold the entity's rules.
 - Use dependency injection for dependencies.
 
 ## Agent Skills

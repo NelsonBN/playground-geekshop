@@ -33,18 +33,18 @@ public void Given_Values_When_Created_Then_ExposesThem()
 
 // BAD: unit test starting real infrastructure instead of substituting the interface
 var options = new DbContextOptionsBuilder<AppDbContext>().UseInMemoryDatabase("x").Options;
-var sut = new CreateOrderUseCase(new OrderRepository(new AppDbContext(options)));
+var sut = new CreateOrderHandler(new OrderRepository(new AppDbContext(options)));
 
 // GOOD: substitute the interface, assert the behaviour
 var repository = Substitute.For<IOrderRepository>();
-var sut = new CreateOrderUseCase(repository);
+var sut = new CreateOrderHandler(repository);
 var id = await sut.ExecuteAsync(request, CancellationToken.None);
 repository.Received(1).Add(Arg.Is<Order>(o => o.Sku == request.Sku));
 ```
 
 - Data-only types (DTOs, records, entities, POCOs): constructors, getters/setters, equality, `ToString`. A type with real behaviour (validation, calculation, state transitions) is tested through that behaviour.
 - Framework wiring and configuration: registration, routing, persistence mapping, option binding.
-- Anything needing real infrastructure or a framework runtime.
+- Anything needing real infrastructure or a framework runtime: no database or in-memory database stand-in, web host, DI container, broker or network in a unit test. Substitute the interface instead.
 
 ## Internals
 
@@ -73,10 +73,11 @@ Infer it from what the code does, not from its name:
 |-------------|------|
 | Decides, calculates, maps or orchestrates through interfaces | Unit, interfaces substituted |
 | Only holds data | None; covered through the behaviour that uses it |
-| Behaves only against real infrastructure or a framework runtime: transport, persistence, external clients, messaging, startup wiring, serialization | Integration, against the real thing |
+| An entry point (endpoint, consumer, job/worker) and the flow behind it | Integration, boundary to boundary, against real containers ([integration-tests.md](integration-tests.md)) |
+| An infrastructure adapter (database, file system, external client) that the flows do not reach | Integration, exceptional case, against the real thing |
 
-If the logic is buried in infrastructure code, extract it behind an interface so the logic is unit-tested and the adapter stays thin.
+An isolated module is always a unit test: its collaborators are substituted with a stub, fake or mock, never an in-memory database or broker. If the logic is buried in infrastructure code, extract it behind an interface so the logic is unit-tested and the adapter stays thin.
 
 ## Smells
 
-Tests of data-only types; unit tests that start real infrastructure or a framework host; a real implementation where an interface could be substituted; mocks of own types or value objects; no assertion or only `NotBeNull`; several Acts; logic or recomputed expectations in the test; `Thread.Sleep`; testing private members; asserting call counts for pure logic; reusing mutable state; catching exceptions in tests; a test that mirrors the implementation instead of the contract; `InternalsVisibleTo` granted to a test project that uses no internal type.
+Those in [What NOT to unit-test](#what-not-to-unit-test) and [Internals](#internals), plus: a real implementation where an interface could be substituted; mocks of own types or value objects; no assertion or only `NotBeNull`; several Acts; logic or recomputed expectations in the test; `Thread.Sleep`; testing private members; asserting call counts for pure logic; reusing mutable state; catching exceptions in tests; a test that mirrors the implementation instead of the contract.

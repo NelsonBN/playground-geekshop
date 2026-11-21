@@ -1,16 +1,20 @@
 using GeekShop.Api.Catalogs.GetCatalog;
 using GeekShop.Api.Catalogs.UpdateCatalog;
 using GeekShop.Api.IntegrationTests.Fixtures;
+using GeekShop.Api.Messaging;
 
 namespace GeekShop.Api.IntegrationTests.Catalogs.UpdateCatalog;
 
-[Collection(nameof(DatabaseCollection))]
+[Collection(nameof(IntegrationCollection))]
 [Trait("Category", "Integration")]
-public sealed class UpdateCatalogEndpointTests(DatabaseFixture database) : IAsyncDisposable
+public sealed class UpdateCatalogEndpointTests(DatabaseFixture database, RabbitMqFixture rabbitMq) : IAsyncLifetime
 {
-    private readonly ApiFactory _factory = new(database.ConnectionString);
+    private readonly ApiFactory _factory = new(database.ConnectionString, rabbitMq.ConnectionString);
 
-    public async ValueTask DisposeAsync()
+    public async Task InitializeAsync()
+        => await rabbitMq.SubscribeAsync(_factory);
+
+    public async Task DisposeAsync()
         => await _factory.DisposeAsync();
 
     [Fact]
@@ -64,5 +68,36 @@ public sealed class UpdateCatalogEndpointTests(DatabaseFixture database) : IAsyn
 
         // Assert
         response.Should().Be404NotFound();
+    }
+
+    [Fact]
+    public async Task Given_ExistingCatalog_When_PutCatalog_Then_PublishesCatalogUpdated()
+    {
+        // Arrange
+        var client = _factory.CreateClient();
+        var id = await CatalogsApi.CreateAsync(client, CatalogsApi.NewAddRequest());
+        var request = new UpdateCatalogRequest { Name = "Winter", Description = "Winter deals" };
+
+        // Act
+        await client.PutAsJsonAsync($"/catalogs/{id}", request, CancellationToken.None);
+
+        // Assert
+        var received = await rabbitMq.ExpectAsync<CatalogUpdated>(Topics.CATALOGS, id);
+        received.Should().BeEquivalentTo(new CatalogUpdated(id, "Winter", "Winter deals"), BrokerEvents.IgnoreEnvelope);
+    }
+
+    [Fact]
+    public async Task Given_UnknownCatalog_When_PutCatalog_Then_PublishesNothing()
+    {
+        // Arrange
+        var client = _factory.CreateClient();
+        var unknown = Guid.NewGuid();
+        var request = new UpdateCatalogRequest { Name = "Winter" };
+
+        // Act
+        await client.PutAsJsonAsync($"/catalogs/{unknown}", request, CancellationToken.None);
+
+        // Assert
+        await rabbitMq.ExpectNothingAsync(Topics.CATALOGS, nameof(CatalogUpdated), unknown);
     }
 }

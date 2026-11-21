@@ -169,6 +169,13 @@ static class TestRunner
     static List<string> UnitProjects() =>
         ProjectFiles().Where(p => Path.GetFileNameWithoutExtension(p).EndsWith(LoadGate().UnitSuffix, StringComparison.OrdinalIgnoreCase)).ToList();
 
+    // Project-file markers of a host that owns entry points and therefore needs an integration project.
+    static readonly string[] EntryPointMarkers =
+    [
+        "Microsoft.NET.Sdk.Web", "Microsoft.AspNetCore", "Microsoft.NET.Sdk.Worker",
+        "Microsoft.Extensions.Hosting", "Microsoft.Azure.Functions.Worker",
+    ];
+
     static List<string> IntegrationProjects() =>
         ProjectFiles().Where(p => Path.GetFileNameWithoutExtension(p).EndsWith(LoadGate().IntegrationSuffix, StringComparison.OrdinalIgnoreCase)).ToList();
 
@@ -300,11 +307,12 @@ static class TestRunner
             }
 
             var text = File.ReadAllText(project);
-            var isWeb = text.Contains("Microsoft.NET.Sdk.Web", StringComparison.Ordinal) || text.Contains("Microsoft.AspNetCore", StringComparison.Ordinal);
+            // A host project owns entry points (endpoints, consumers, jobs/workers): web, worker service, generic host or Azure Functions.
+            var isHost = EntryPointMarkers.Any(marker => text.Contains(marker, StringComparison.Ordinal));
             var hasIntegration = integrations.Any(p => string.Equals(Path.GetFileNameWithoutExtension(p), name + gate.IntegrationSuffix, StringComparison.OrdinalIgnoreCase));
-            if (isWeb && !hasIntegration && reported.Add("integration:" + name))
+            if (isHost && !hasIntegration && reported.Add("integration:" + name))
             {
-                findings.Add($"missing integration   {Rel(Path.Combine(Path.GetFullPath("tests"), name + gate.IntegrationSuffix, name + gate.IntegrationSuffix + ".csproj"))}  ({name} is a web project)");
+                findings.Add($"missing integration   {Rel(Path.Combine(Path.GetFullPath("tests"), name + gate.IntegrationSuffix, name + gate.IntegrationSuffix + ".csproj"))}  ({name} is a host project with entry points)");
             }
         }
 

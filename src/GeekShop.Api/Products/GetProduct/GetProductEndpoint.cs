@@ -4,11 +4,11 @@ internal static class GetProductEndpoint
 {
     public static void Map(RouteGroupBuilder group)
         => group.MapGet("/{id:guid}", async (
-            GetProductUseCase useCase,
+            GetProductHandler handler,
             Guid id,
             CancellationToken cancellationToken) =>
         {
-            var product = await useCase.HandleAsync(id, cancellationToken);
+            var product = await handler.HandleAsync(id, cancellationToken);
 
             if(product is null)
             {

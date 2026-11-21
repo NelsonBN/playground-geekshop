@@ -14,11 +14,11 @@ public static class ProductsSetup
             .AddDbContext<ProductsDbContext>(options
                 => options.UseSqlServer(configuration.GetConnectionString("GeekShop")))
             .AddScoped<IProductsRepository, ProductsRepository>()
-            .AddTransient<AddProductUseCase>()
-            .AddTransient<DeleteProductUseCase>()
-            .AddTransient<GetProductUseCase>()
-            .AddTransient<GetProductsUseCase>()
-            .AddTransient<UpdateProductUseCase>();
+            .AddTransient<AddProductHandler>()
+            .AddTransient<DeleteProductHandler>()
+            .AddTransient<GetProductHandler>()
+            .AddTransient<GetProductsHandler>()
+            .AddTransient<UpdateProductHandler>();
 
     public static IEndpointRouteBuilder MapProducts(this IEndpointRouteBuilder endpoints)
     {

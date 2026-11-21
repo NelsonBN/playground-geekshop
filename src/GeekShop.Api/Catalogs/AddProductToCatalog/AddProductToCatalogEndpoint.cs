@@ -4,12 +4,12 @@ internal static class AddProductToCatalogEndpoint
 {
     public static void Map(RouteGroupBuilder group)
         => group.MapPut("/{id:guid}/products/{productId:guid}", async (
-            AddProductToCatalogUseCase useCase,
+            AddProductToCatalogHandler handler,
             Guid id,
             Guid productId,
             CancellationToken cancellationToken) =>
         {
-            var added = await useCase.HandleAsync(id, productId, cancellationToken);
+            var added = await handler.HandleAsync(id, productId, cancellationToken);
 
             if(!added)
             {

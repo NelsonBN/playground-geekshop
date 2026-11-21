@@ -18,15 +18,15 @@ Every package is referenced with an **exact version** (e.g. `9.6.0`); wildcards 
 | `Microsoft.NET.Test.Sdk` (base) | Test host | Always | Every test project |
 | `xunit.analyzers` (base, included with xunit) | Test-quality analyzer rules | Always | Every test project |
 | `AwesomeAssertions` (base) | All assertions (`.Should()`) | Always | Every test |
-| `Stryker.NET` (`dotnet-stryker`, base) | Mutation testing, as a local tool pinned in `.config/dotnet-tools.json` | Always | Mutation step on changed files |
-| `NSubstitute` (base) | Dummy, stub, spy, mock, fake | Specific cases | The unit depends on a boundary (I/O, clock, external service) |
-| `Testcontainers` + module (base) | Real dependencies in disposable containers | Specific cases | Integration tests that need a real database, cache or broker |
+| `Stryker.NET` (`dotnet-stryker`, base) | Mutation testing, local tool only ([mutation-tests.md](mutation-tests.md#setup)) | Always | Mutation step on changed files |
+| `NSubstitute` (base) | Dummy, stub, spy, mock, fake, in unit tests only | Specific cases | The unit depends on a boundary (I/O, clock, external service); never in integration tests |
+| `Testcontainers` + module (base) | Every external service of an integration test in a disposable container; which container to pick: [integration-tests.md](integration-tests.md#dependencies-run-in-testcontainers) | Always | Every integration test project: databases, brokers, caches, storage, external APIs, any infrastructure |
 | `Microsoft.AspNetCore.Mvc.Testing` (base) | `WebApplicationFactory` in-process API host | Specific cases | Integration tests of web/API projects |
 | `AwesomeAssertions.Web` (base) | Assertions on `HttpResponseMessage` | Specific cases | HTTP integration tests |
 | `ReportGenerator` (base) | Merged summary and HTML coverage report | Specific cases | A human-readable or CI report is wanted (the gate works without it) |
 | `Microsoft.Extensions.TimeProvider.Testing` (`FakeTimeProvider`) | Deterministic time | Specific cases | Code uses clocks, delays or expiry |
 | `Bogus` | Realistic generated test data | Specific cases | Builders become long, or varied data helps |
-| `WireMock.Net.Testcontainers` (`WireMockContainer`) | Fake external HTTP services, run as a WireMock container through Testcontainers (not in-process) | Specific cases | Integration tests call third-party APIs |
+| `WireMock.Net.Testcontainers` (`WireMockContainer`) | Protocol-level emulator of an external HTTP service, run as a container through Testcontainers (not in-process, not a mock of the app); the customized-container option when an API has no image | Specific cases | Integration tests call third-party or internal HTTP APIs |
 | `Microsoft.Extensions.Diagnostics.Testing` | Assert logs and metrics | Specific cases | Logging or metrics are part of the contract |
 | `ReportGenerator` report type `MarkdownSummaryGithub` | Coverage summary on pull requests | Specific cases | The repo uses GitHub Actions |
 

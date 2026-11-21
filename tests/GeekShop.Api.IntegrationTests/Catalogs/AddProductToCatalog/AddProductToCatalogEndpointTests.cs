@@ -1,16 +1,21 @@
 using System.Net;
+using GeekShop.Api.Catalogs.AddProductToCatalog;
 using GeekShop.Api.Catalogs.GetCatalog;
 using GeekShop.Api.IntegrationTests.Fixtures;
+using GeekShop.Api.Messaging;
 
 namespace GeekShop.Api.IntegrationTests.Catalogs.AddProductToCatalog;
 
-[Collection(nameof(DatabaseCollection))]
+[Collection(nameof(IntegrationCollection))]
 [Trait("Category", "Integration")]
-public sealed class AddProductToCatalogEndpointTests(DatabaseFixture database) : IAsyncDisposable
+public sealed class AddProductToCatalogEndpointTests(DatabaseFixture database, RabbitMqFixture rabbitMq) : IAsyncLifetime
 {
-    private readonly ApiFactory _factory = new(database.ConnectionString);
+    private readonly ApiFactory _factory = new(database.ConnectionString, rabbitMq.ConnectionString);
 
-    public async ValueTask DisposeAsync()
+    public async Task InitializeAsync()
+        => await rabbitMq.SubscribeAsync(_factory);
+
+    public async Task DisposeAsync()
         => await _factory.DisposeAsync();
 
     [Fact]
@@ -80,5 +85,35 @@ public sealed class AddProductToCatalogEndpointTests(DatabaseFixture database) :
 
         // Assert
         response.Should().Be404NotFound();
+    }
+
+    [Fact]
+    public async Task Given_ExistingCatalogAndProduct_When_PutCatalogProduct_Then_PublishesProductAddedToCatalog()
+    {
+        // Arrange
+        var client = _factory.CreateClient();
+        var productId = await ProductsApi.CreateAsync(client, ProductsApi.NewAddRequest());
+        var catalogId = await CatalogsApi.CreateAsync(client, CatalogsApi.NewAddRequest());
+
+        // Act
+        await CatalogsApi.AddProductAsync(client, catalogId, productId);
+
+        // Assert
+        var received = await rabbitMq.ExpectAsync<ProductAddedToCatalog>(Topics.CATALOGS, catalogId, "catalogId");
+        received.Should().BeEquivalentTo(new ProductAddedToCatalog(catalogId, productId), BrokerEvents.IgnoreEnvelope);
+    }
+
+    [Fact]
+    public async Task Given_UnknownIds_When_PutCatalogProduct_Then_PublishesNothing()
+    {
+        // Arrange
+        var client = _factory.CreateClient();
+        var unknown = Guid.NewGuid();
+
+        // Act
+        await client.PutAsync($"/catalogs/{unknown}/products/{unknown}", null, CancellationToken.None);
+
+        // Assert
+        await rabbitMq.ExpectNothingAsync(Topics.CATALOGS, nameof(ProductAddedToCatalog), unknown, "catalogId");
     }
 }

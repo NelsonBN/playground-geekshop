@@ -29,7 +29,7 @@ public sealed class OrderPlacedConsumerTests(PaymentsHostFixture host) : IClassF
 
         // Assert: wait for the observable outcome at the last boundaries
         await Eventually.ForAsync(
-            async () => await host.CountPaymentsAsync(orderId, CancellationToken.None) == 1,
+            async token => await host.CountPaymentsAsync(orderId, token) == 1,
             Timeout, "a payment row for the placed order", CancellationToken.None);
         (await host.Provider.ChargeCallsAsync(CancellationToken.None)).Should().Be(1);
     }
@@ -46,26 +46,30 @@ public sealed class OrderPlacedConsumerTests(PaymentsHostFixture host) : IClassF
 
         // Assert
         await Eventually.ForAsync(
-            async () => await host.DeadLetterCountAsync(CancellationToken.None) == 1,
+            async token => await host.DeadLetterCountAsync(token) == 1,
             Timeout, "the message in the dead-letter queue", CancellationToken.None);
         (await host.CountPaymentsAsync(orderId, CancellationToken.None)).Should().Be(0);
     }
 }
 
-// Bounded polling helper (lives in the test project, not in production code)
+// Bounded polling helper (lives in the test project, not in production code). The deadline covers the whole loop:
+// the condition receives the deadline token, so a stalled database or broker call cannot outlive the timeout.
 internal static class Eventually
 {
-    public static async Task ForAsync(Func<Task<bool>> condition, TimeSpan timeout, string awaited, CancellationToken cancellationToken)
+    public static async Task ForAsync(Func<CancellationToken, Task<bool>> condition, TimeSpan timeout, string awaited, CancellationToken cancellationToken)
     {
         using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
         cts.CancelAfter(timeout);
-        while (!await condition())
+        try
         {
-            try { await Task.Delay(TimeSpan.FromMilliseconds(100), cts.Token); }
-            catch (OperationCanceledException) when (!cancellationToken.IsCancellationRequested)
+            while (!await condition(cts.Token))
             {
-                throw new TimeoutException($"Timed out after {timeout.TotalSeconds}s waiting for {awaited}.");
+                await Task.Delay(TimeSpan.FromMilliseconds(100), cts.Token);
             }
+        }
+        catch (OperationCanceledException) when (!cancellationToken.IsCancellationRequested)
+        {
+            throw new TimeoutException($"Timed out after {timeout.TotalSeconds}s waiting for {awaited}.");
         }
     }
 }

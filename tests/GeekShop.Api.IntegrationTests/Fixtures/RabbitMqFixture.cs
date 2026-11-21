@@ -59,13 +59,27 @@ public sealed class RabbitMqFixture : IAsyncLifetime
         }
     }
 
-    /// <summary>The exchanges, out of those given, that exist on the broker.</summary>
-    public async Task<IReadOnlyList<string>> ExistingExchangesAsync(IEnumerable<string> exchanges)
+    /// <summary>
+    /// Creates an empty virtual host on the broker, isolated from every other test, and returns the AMQP URI that
+    /// points at it. Exchanges declared in it by one test are invisible to the others.
+    /// </summary>
+    public async Task<string> CreateVirtualHostAsync()
     {
+        var name = $"vhost-{Guid.NewGuid():N}";
+        await _runAsync("rabbitmqctl", "add_vhost", name);
+        await _runAsync("rabbitmqctl", "set_permissions", "-p", name, "guest", ".*", ".*", ".*");
+
+        return $"{ConnectionString.TrimEnd('/')}/{name}";
+    }
+
+    /// <summary>The exchanges, out of those given, that exist on the broker (or on the virtual host of the given URI).</summary>
+    public async Task<IReadOnlyList<string>> ExistingExchangesAsync(IEnumerable<string> exchanges, string? connectionString = null)
+    {
+        await using var connection = await new ConnectionFactory { Uri = new Uri(connectionString ?? ConnectionString) }.CreateConnectionAsync();
         var existing = new List<string>();
         foreach(var exchange in exchanges)
         {
-            if(await _exchangeExistsAsync(exchange))
+            if(await _exchangeExistsAsync(connection, exchange))
             {
                 existing.Add(exchange);
             }
@@ -74,12 +88,21 @@ public sealed class RabbitMqFixture : IAsyncLifetime
         return existing;
     }
 
+    private async Task _runAsync(params string[] command)
+    {
+        var result = await _container.ExecAsync(command);
+        if(result.ExitCode != 0)
+        {
+            throw new InvalidOperationException($"'{string.Join(' ', command)}' failed: {result.Stderr}");
+        }
+    }
+
     // A passive declare fails when the exchange does not exist.
-    private async Task<bool> _exchangeExistsAsync(string exchange)
+    private static async Task<bool> _exchangeExistsAsync(IConnection connection, string exchange)
     {
         try
         {
-            await using var channel = await _connection!.CreateChannelAsync();
+            await using var channel = await connection.CreateChannelAsync();
             await channel.ExchangeDeclarePassiveAsync(exchange);
 
             return true;

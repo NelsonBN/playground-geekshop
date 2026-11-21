@@ -1,0 +1,48 @@
+<!-- Example only: INTEGRATION test project. Copy to <Project>.IntegrationTests/<Project>.IntegrationTests.csproj. For a unit project use TestProject.csproj.example.
+     Every `<exact-version>` is a placeholder that makes the file invalid on purpose: NEVER write a wildcard or floating version
+     (`*`, `2.*`, `2.*.*`, `[2,)`). Install each package with `dotnet add package <id>` (xunit: `--version 2.9.3`, keep it on 2.x) so the resolved exact
+     version is written, and check it afterwards. With central package management, move Version to Directory.Packages.props.
+     No NSubstitute here: mocking libraries are not allowed in integration tests (references/integration-tests.md). -->
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <!-- Placeholder: use the TargetFramework of the source project (for example net8.0) -->
+    <TargetFramework><target-framework></TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="<exact-version>" />
+    <PackageReference Include="xunit" Version="<exact-version>" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="<exact-version>" PrivateAssets="all" />
+    <PackageReference Include="coverlet.collector" Version="<exact-version>" PrivateAssets="all" />
+    <PackageReference Include="AwesomeAssertions" Version="<exact-version>" />
+  </ItemGroup>
+
+  <!-- Every external service runs for real in a container. Keep only what the host uses; pick the modules by the selection order in
+       references/integration-tests.md#dependencies-run-in-testcontainers -->
+  <ItemGroup>
+    <PackageReference Include="Testcontainers" Version="<exact-version>" />
+    <!-- Service modules, one per dependency, e.g. Testcontainers.PostgreSql, Testcontainers.MsSql, Testcontainers.RabbitMq, Testcontainers.Redis -->
+    <PackageReference Include="Testcontainers.PostgreSql" Version="<exact-version>" />
+    <PackageReference Include="Testcontainers.RabbitMq" Version="<exact-version>" />
+    <!-- Protocol-level emulator, as a container, for third-party or internal HTTP APIs that have no image -->
+    <PackageReference Include="WireMock.Net.Testcontainers" Version="<exact-version>" />
+    <!-- Web/API hosts only -->
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="<exact-version>" />
+    <PackageReference Include="AwesomeAssertions.Web" Version="<exact-version>" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Using Include="Xunit" />
+    <Using Include="AwesomeAssertions" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- tests/MyProject.IntegrationTests/MyProject.IntegrationTests.csproj: reference only its own source project -->
+    <ProjectReference Include="..\..\src\MyProject\MyProject.csproj" />
+  </ItemGroup>
+
+</Project>

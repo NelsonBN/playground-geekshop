@@ -1,14 +1,19 @@
+using GeekShop.Api.Catalogs.DeleteCatalog;
 using GeekShop.Api.IntegrationTests.Fixtures;
+using GeekShop.Api.Messaging;
 
 namespace GeekShop.Api.IntegrationTests.Catalogs.DeleteCatalog;
 
-[Collection(nameof(DatabaseCollection))]
+[Collection(nameof(IntegrationCollection))]
 [Trait("Category", "Integration")]
-public sealed class DeleteCatalogEndpointTests(DatabaseFixture database) : IAsyncDisposable
+public sealed class DeleteCatalogEndpointTests(DatabaseFixture database, RabbitMqFixture rabbitMq) : IAsyncLifetime
 {
-    private readonly ApiFactory _factory = new(database.ConnectionString);
+    private readonly ApiFactory _factory = new(database.ConnectionString, rabbitMq.ConnectionString);
 
-    public async ValueTask DisposeAsync()
+    public async Task InitializeAsync()
+        => await rabbitMq.SubscribeAsync(_factory);
+
+    public async Task DisposeAsync()
         => await _factory.DisposeAsync();
 
     [Fact]
@@ -42,5 +47,34 @@ public sealed class DeleteCatalogEndpointTests(DatabaseFixture database) : IAsyn
 
         // Assert
         response.Should().Be404NotFound();
+    }
+
+    [Fact]
+    public async Task Given_ExistingCatalog_When_DeleteCatalog_Then_PublishesCatalogDeleted()
+    {
+        // Arrange
+        var client = _factory.CreateClient();
+        var id = await CatalogsApi.CreateAsync(client, CatalogsApi.NewAddRequest());
+
+        // Act
+        await client.DeleteAsync($"/catalogs/{id}", CancellationToken.None);
+
+        // Assert
+        var received = await rabbitMq.ExpectAsync<CatalogDeleted>(Topics.CATALOGS, id);
+        received.Should().BeEquivalentTo(new CatalogDeleted(id), BrokerEvents.IgnoreEnvelope);
+    }
+
+    [Fact]
+    public async Task Given_UnknownCatalog_When_DeleteCatalog_Then_PublishesNothing()
+    {
+        // Arrange
+        var client = _factory.CreateClient();
+        var unknown = Guid.NewGuid();
+
+        // Act
+        await client.DeleteAsync($"/catalogs/{unknown}", CancellationToken.None);
+
+        // Assert
+        await rabbitMq.ExpectNothingAsync(Topics.CATALOGS, nameof(CatalogDeleted), unknown);
     }
 }

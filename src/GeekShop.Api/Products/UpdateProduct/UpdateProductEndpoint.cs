@@ -4,12 +4,12 @@ internal static class UpdateProductEndpoint
 {
     public static void Map(RouteGroupBuilder group)
         => group.MapPut("/{id:guid}", async (
-            UpdateProductUseCase useCase,
+            UpdateProductHandler handler,
             Guid id,
             UpdateProductRequest request,
             CancellationToken cancellationToken) =>
         {
-            var updated = await useCase.HandleAsync(id, request, cancellationToken);
+            var updated = await handler.HandleAsync(id, request, cancellationToken);
 
             if(!updated)
             {

@@ -4,7 +4,7 @@ internal static class GetCatalogsEndpoint
 {
     public static void Map(RouteGroupBuilder group)
         => group.MapGet("/", async (
-            GetCatalogsUseCase useCase,
+            GetCatalogsHandler handler,
             CancellationToken cancellationToken)
-            => Results.Ok(await useCase.HandleAsync(cancellationToken)));
+            => Results.Ok(await handler.HandleAsync(cancellationToken)));
 }

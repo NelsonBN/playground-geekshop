@@ -3,11 +3,11 @@ using GeekShop.Api.IntegrationTests.Fixtures;
 
 namespace GeekShop.Api.IntegrationTests.Catalogs.GetCatalog;
 
-[Collection(nameof(DatabaseCollection))]
+[Collection(nameof(IntegrationCollection))]
 [Trait("Category", "Integration")]
-public sealed class GetCatalogEndpointTests(DatabaseFixture database) : IAsyncDisposable
+public sealed class GetCatalogEndpointTests(DatabaseFixture database, RabbitMqFixture rabbitMq) : IAsyncDisposable
 {
-    private readonly ApiFactory _factory = new(database.ConnectionString);
+    private readonly ApiFactory _factory = new(database.ConnectionString, rabbitMq.ConnectionString);
 
     public async ValueTask DisposeAsync()
         => await _factory.DisposeAsync();

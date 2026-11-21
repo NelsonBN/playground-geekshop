@@ -1,16 +1,21 @@
 using System.Net;
 using GeekShop.Api.Catalogs.GetCatalog;
+using GeekShop.Api.Catalogs.RemoveProductFromCatalog;
 using GeekShop.Api.IntegrationTests.Fixtures;
+using GeekShop.Api.Messaging;
 
 namespace GeekShop.Api.IntegrationTests.Catalogs.RemoveProductFromCatalog;
 
-[Collection(nameof(DatabaseCollection))]
+[Collection(nameof(IntegrationCollection))]
 [Trait("Category", "Integration")]
-public sealed class RemoveProductFromCatalogEndpointTests(DatabaseFixture database) : IAsyncDisposable
+public sealed class RemoveProductFromCatalogEndpointTests(DatabaseFixture database, RabbitMqFixture rabbitMq) : IAsyncLifetime
 {
-    private readonly ApiFactory _factory = new(database.ConnectionString);
+    private readonly ApiFactory _factory = new(database.ConnectionString, rabbitMq.ConnectionString);
 
-    public async ValueTask DisposeAsync()
+    public async Task InitializeAsync()
+        => await rabbitMq.SubscribeAsync(_factory);
+
+    public async Task DisposeAsync()
         => await _factory.DisposeAsync();
 
     [Fact]
@@ -84,5 +89,37 @@ public sealed class RemoveProductFromCatalogEndpointTests(DatabaseFixture databa
 
         // Assert
         response.Should().Be404NotFound();
+    }
+
+    [Fact]
+    public async Task Given_ProductInCatalog_When_DeleteCatalogProduct_Then_PublishesProductRemovedFromCatalog()
+    {
+        // Arrange
+        var client = _factory.CreateClient();
+        var productId = await ProductsApi.CreateAsync(client, ProductsApi.NewAddRequest());
+        var catalogId = await CatalogsApi.CreateAsync(client, CatalogsApi.NewAddRequest());
+        await CatalogsApi.AddProductAsync(client, catalogId, productId);
+
+        // Act
+        await client.DeleteAsync($"/catalogs/{catalogId}/products/{productId}", CancellationToken.None);
+
+        // Assert
+        var received = await rabbitMq.ExpectAsync<ProductRemovedFromCatalog>(Topics.CATALOGS, catalogId, "catalogId");
+        received.Should().BeEquivalentTo(
+            new ProductRemovedFromCatalog(catalogId, productId), BrokerEvents.IgnoreEnvelope);
+    }
+
+    [Fact]
+    public async Task Given_UnknownIds_When_DeleteCatalogProduct_Then_PublishesNothing()
+    {
+        // Arrange
+        var client = _factory.CreateClient();
+        var unknown = Guid.NewGuid();
+
+        // Act
+        await client.DeleteAsync($"/catalogs/{unknown}/products/{unknown}", CancellationToken.None);
+
+        // Assert
+        await rabbitMq.ExpectNothingAsync(Topics.CATALOGS, nameof(ProductRemovedFromCatalog), unknown, "catalogId");
     }
 }

@@ -7,8 +7,12 @@ public sealed class CatalogTests
     [Fact]
     public void Given_ValidData_When_Create_Then_ReturnsCatalogWithNewId()
     {
+        // Arrange
+        var name = "Summer";
+        var description = "Summer deals";
+
         // Act
-        var catalog = Catalog.Create("Summer", "Summer deals");
+        var catalog = Catalog.Create(name, description);
 
         // Assert
         catalog.Id.Should().NotBeEmpty();
@@ -19,8 +23,11 @@ public sealed class CatalogTests
     [Fact]
     public void Given_NoDescription_When_Create_Then_AcceptsIt()
     {
+        // Arrange
+        string? description = null;
+
         // Act
-        var catalog = Catalog.Create("Summer", null);
+        var catalog = Catalog.Create("Summer", description);
 
         // Assert
         catalog.Description.Should().BeNull();
@@ -29,10 +36,12 @@ public sealed class CatalogTests
     [Fact]
     public void Given_LimitLengths_When_Create_Then_AcceptsThem()
     {
+        // Arrange
+        var name = new string('n', Catalog.NAME_MAX_LENGTH);
+        var description = new string('d', Catalog.DESCRIPTION_MAX_LENGTH);
+
         // Act
-        var catalog = Catalog.Create(
-            new string('n', Catalog.NAME_MAX_LENGTH),
-            new string('d', Catalog.DESCRIPTION_MAX_LENGTH));
+        var catalog = Catalog.Create(name, description);
 
         // Assert
         catalog.Name.Should().HaveLength(Catalog.NAME_MAX_LENGTH);
@@ -44,8 +53,11 @@ public sealed class CatalogTests
     [InlineData("   ")]
     public void Given_BlankName_When_Create_Then_Throws(string name)
     {
+        // Arrange
+        string? description = null;
+
         // Act
-        var act = () => Catalog.Create(name, null);
+        var act = () => Catalog.Create(name, description);
 
         // Assert
         act.Should().Throw<InvalidCatalogException>().WithMessage("*name*required*");
@@ -54,8 +66,11 @@ public sealed class CatalogTests
     [Fact]
     public void Given_NameOverLimit_When_Create_Then_Throws()
     {
+        // Arrange
+        var name = new string('n', Catalog.NAME_MAX_LENGTH + 1);
+
         // Act
-        var act = () => Catalog.Create(new string('n', Catalog.NAME_MAX_LENGTH + 1), null);
+        var act = () => Catalog.Create(name, null);
 
         // Assert
         act.Should().Throw<InvalidCatalogException>().WithMessage("*name*200*");
@@ -64,8 +79,11 @@ public sealed class CatalogTests
     [Fact]
     public void Given_DescriptionOverLimit_When_Create_Then_Throws()
     {
+        // Arrange
+        var description = new string('d', Catalog.DESCRIPTION_MAX_LENGTH + 1);
+
         // Act
-        var act = () => Catalog.Create("Summer", new string('d', Catalog.DESCRIPTION_MAX_LENGTH + 1));
+        var act = () => Catalog.Create("Summer", description);
 
         // Assert
         act.Should().Throw<InvalidCatalogException>().WithMessage("*description*500*");

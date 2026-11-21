@@ -1,0 +1,79 @@
+// Path: tests/Payments.IntegrationTests/Consumers/OrderPlacedConsumerTests.cs  (project Payments.IntegrationTests)
+// Example only (not compiled): a boundary-to-boundary flow for a message consumer (same shape for a job/background worker):
+// message published to the real broker -> production consumer -> database write -> call to the external API.
+// Host = production host, only configuration changes. Broker, database and the external API run in Testcontainers.
+// Asynchronous outcome: trigger deterministically, then poll with a timeout. Never Thread.Sleep.
+using Npgsql;
+using RabbitMQ.Client;
+using Testcontainers.PostgreSql;
+using Testcontainers.RabbitMq;
+using WireMock.Client;
+using WireMock.Net.Testcontainers;
+
+namespace Payments.IntegrationTests;
+
+[Trait("Category", "Integration")]
+public sealed class OrderPlacedConsumerTests(PaymentsHostFixture host) : IClassFixture<PaymentsHostFixture>
+{
+    private static readonly TimeSpan Timeout = TimeSpan.FromSeconds(15);
+
+    [Fact]
+    public async Task Given_OrderPlacedMessage_When_Consumed_Then_PaymentRowIsStoredAndProviderIsCalled()
+    {
+        // Arrange: the external provider answers like the real one (stubbed at protocol level in its container)
+        await host.Provider.StubChargeAcceptedAsync(CancellationToken.None);
+        var orderId = Guid.NewGuid();
+
+        // Act: the single trigger of the flow is publishing the message to the real broker
+        await host.PublishAsync("orders.placed", new { OrderId = orderId, Amount = 25.00m }, CancellationToken.None);
+
+        // Assert: wait for the observable outcome at the last boundaries
+        await Eventually.ForAsync(
+            async token => await host.CountPaymentsAsync(orderId, token) == 1,
+            Timeout, "a payment row for the placed order", CancellationToken.None);
+        (await host.Provider.ChargeCallsAsync(CancellationToken.None)).Should().Be(1);
+    }
+
+    [Fact]
+    public async Task Given_ProviderUnavailable_When_Consumed_Then_MessageGoesToDeadLetterAndNoPaymentIsStored()
+    {
+        // Arrange
+        await host.Provider.StubChargeUnavailableAsync(CancellationToken.None);
+        var orderId = Guid.NewGuid();
+
+        // Act
+        await host.PublishAsync("orders.placed", new { OrderId = orderId, Amount = 25.00m }, CancellationToken.None);
+
+        // Assert
+        await Eventually.ForAsync(
+            async token => await host.DeadLetterCountAsync(token) == 1,
+            Timeout, "the message in the dead-letter queue", CancellationToken.None);
+        (await host.CountPaymentsAsync(orderId, CancellationToken.None)).Should().Be(0);
+    }
+}
+
+// Bounded polling helper (lives in the test project, not in production code). The deadline covers the whole loop:
+// the condition receives the deadline token, so a stalled database or broker call cannot outlive the timeout.
+internal static class Eventually
+{
+    public static async Task ForAsync(Func<CancellationToken, Task<bool>> condition, TimeSpan timeout, string awaited, CancellationToken cancellationToken)
+    {
+        using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+        cts.CancelAfter(timeout);
+        try
+        {
+            while (!await condition(cts.Token))
+            {
+                await Task.Delay(TimeSpan.FromMilliseconds(100), cts.Token);
+            }
+        }
+        catch (OperationCanceledException) when (!cancellationToken.IsCancellationRequested)
+        {
+            throw new TimeoutException($"Timed out after {timeout.TotalSeconds}s waiting for {awaited}.");
+        }
+    }
+}
+
+// PaymentsHostFixture (not shown): a WebApplicationFactory<Program> / host builder that starts RabbitMqContainer,
+// PostgreSqlContainer and WireMockContainer, passes their connection details through configuration only,
+// and exposes PublishAsync, CountPaymentsAsync, DeadLetterCountAsync and a Provider wrapper over the WireMock admin API.

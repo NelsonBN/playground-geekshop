@@ -16,13 +16,13 @@ public static class CatalogsSetup
             .AddDbContext<CatalogsDbContext>(options
                 => options.UseSqlServer(configuration.GetConnectionString("GeekShop")))
             .AddScoped<ICatalogsRepository, CatalogsRepository>()
-            .AddTransient<AddCatalogUseCase>()
-            .AddTransient<AddProductToCatalogUseCase>()
-            .AddTransient<DeleteCatalogUseCase>()
-            .AddTransient<GetCatalogUseCase>()
-            .AddTransient<GetCatalogsUseCase>()
-            .AddTransient<RemoveProductFromCatalogUseCase>()
-            .AddTransient<UpdateCatalogUseCase>();
+            .AddTransient<AddCatalogHandler>()
+            .AddTransient<AddProductToCatalogHandler>()
+            .AddTransient<DeleteCatalogHandler>()
+            .AddTransient<GetCatalogHandler>()
+            .AddTransient<GetCatalogsHandler>()
+            .AddTransient<RemoveProductFromCatalogHandler>()
+            .AddTransient<UpdateCatalogHandler>();
 
     public static IEndpointRouteBuilder MapCatalogs(this IEndpointRouteBuilder endpoints)
     {

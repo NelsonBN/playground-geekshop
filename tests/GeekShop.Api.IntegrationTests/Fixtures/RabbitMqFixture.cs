@@ -72,6 +72,13 @@ public sealed class RabbitMqFixture : IAsyncLifetime
         return $"{ConnectionString.TrimEnd('/')}/{name}";
     }
 
+    /// <summary>
+    /// Deletes the virtual host the given URI points at, which drops its connections: from then on the broker is
+    /// unusable for that host, like an outage that starts after the API is up.
+    /// </summary>
+    public async Task DeleteVirtualHostAsync(string connectionString)
+        => await _runAsync("rabbitmqctl", "delete_vhost", new Uri(connectionString).AbsolutePath.TrimStart('/'));
+
     /// <summary>The exchanges, out of those given, that exist on the broker (or on the virtual host of the given URI).</summary>
     public async Task<IReadOnlyList<string>> ExistingExchangesAsync(IEnumerable<string> exchanges, string? connectionString = null)
     {

@@ -1,26 +1,18 @@
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
-using Microsoft.AspNetCore.TestHost;
-using Microsoft.Extensions.DependencyInjection.Extensions;
-using Microsoft.Extensions.Hosting;
 
 namespace GeekShop.Api.IntegrationTests.Fixtures;
 
 /// <summary>
-/// Hosts the real API in-process against the shared SQL Server and RabbitMQ containers. The host publishes to the real
-/// broker and declares the exchanges when it starts, like in production. A host that must start while the broker is
-/// unreachable skips that warm-up with <paramref name="exchangesWarmUp"/>.
+/// Hosts the real API in-process against the shared SQL Server and RabbitMQ containers. The host is the production one,
+/// hosted services included: it publishes to the real broker and declares the exchanges when it starts, so it does not
+/// start while the broker is unreachable, exactly like in production. Only the connection settings differ.
 /// </summary>
-public sealed class ApiFactory(string connectionString, string rabbitMq, bool exchangesWarmUp = true) : WebApplicationFactory<Program>
+public sealed class ApiFactory(string connectionString, string rabbitMq) : WebApplicationFactory<Program>
 {
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
         builder.UseSetting("ConnectionStrings:GeekShop", connectionString);
         builder.UseSetting("RabbitMq:ConnectionString", rabbitMq);
-
-        if(!exchangesWarmUp)
-        {
-            builder.ConfigureTestServices(services => services.RemoveAll<IHostedService>());
-        }
     }
 }
